@@ -1,5 +1,7 @@
 package project5.bean;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.*;
 import project5.dao.CategoryDao;
 import project5.dao.TaskDao;
 import project5.dao.UserDao;
@@ -30,12 +32,16 @@ public class TaskBean implements Serializable {
     @EJB
     private TaskBean taskBean;
 
-
-
+    private static final Logger logger = LogManager.getLogger(TaskBean.class);
 
     public boolean newTask(Task task, String token) {
         boolean created = false;
-
+        logger.info("Task " + task.getTitle() + " is added successfully by " + userDao.findUserByToken(token).getUsername());
+        logger.debug("Sample debug message");
+        logger.info("Sample info message");
+        logger.warn("Sample warn message");
+        logger.error("Sample error message");
+        logger.fatal("Sample fatal message");
         task.generateId();
         task.setInitialStateId();
         task.setOwner(userBean.convertUserEntitytoUserDto(userDao.findUserByToken(token)));
@@ -195,7 +201,6 @@ public class TaskBean implements Serializable {
             if (userTasks != null) {
                 for (TaskEntity taskEntity : userTasks) {
                     taskEntity.setErased(true);
-                    taskEntity.setOwner(userDao.findUserByUsername("NotAssigned"));
                     taskDao.merge(taskEntity);
                 }
                 erased = true;

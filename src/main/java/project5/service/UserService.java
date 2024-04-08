@@ -471,6 +471,8 @@ public class UserService {
         if (userBean.isAuthenticated(token)) {
             if (userBean.userIsTaskOwner(token, id) || userBean.userIsScrumMaster(token) || userBean.userIsProductOwner(token)) {
                 boolean updated = taskBean.updateTask(task, id);
+                System.out.println(task.getCategory().getName() + " " + task.getOwner() + " " + task.getErased() + " " + task.getStateId() + " "
+                        + task.getDescription() + " " + task.getTitle() + " " + task.getId());
                 if (updated) {
                     response = Response.status(200).entity("Task updated successfully").build();
                 } else {
