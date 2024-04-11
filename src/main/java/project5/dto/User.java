@@ -35,6 +35,10 @@ public class User {
     public static final int NOTASSIGNED = 400;
     @XmlElement
     private ArrayList<Task> userTasks = new ArrayList<>(); //ser array de ids das tasks assim as tasks ficavam no json das tasks
+    @XmlElement
+    private long expirationTime;
+    @XmlElement
+    private boolean confirmed;
 
     public User() {
     }
@@ -129,6 +133,20 @@ public class User {
         } else {
             this.typeOfUser = DEVELOPER;
         }
+    }
+
+    public long getExpirationTime() {
+        return expirationTime;
+    }
+    public void setExpirationTime(long expirationTime) {
+        this.expirationTime = expirationTime;
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
     }
 
     @Override

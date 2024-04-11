@@ -1,6 +1,8 @@
 package project5.service;
 
+import org.mindrot.jbcrypt.BCrypt;
 import project5.bean.CategoryBean;
+import project5.bean.EmailBean;
 import project5.bean.TaskBean;
 import project5.bean.UserBean;
 import project5.dto.*;
@@ -8,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import project5.entity.UserEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,8 @@ public class UserService {
     TaskBean taskBean;
     @Inject
     CategoryBean categoryBean;
+    @Inject
+    EmailBean emailBean;
 
 
     @POST
@@ -30,6 +35,7 @@ public class UserService {
     public Response login(Login login) {
 
         LoggedUser loggedUser = userBean.login(login);
+        System.out.println("Logged user: " + loggedUser.getPassword() + loggedUser.getUsername());
         Response response;
 
         if (loggedUser != null) {
@@ -37,6 +43,7 @@ public class UserService {
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
+
         return response;
     }
 
@@ -62,6 +69,11 @@ public class UserService {
         boolean isFieldEmpty = userBean.isAnyFieldEmpty(user);
         boolean isPhoneNumberValid = userBean.isPhoneNumberValid(user);
         boolean isImageValid = userBean.isImageUrlValid(user.getPhotoURL());
+        long expirationTime = System.currentTimeMillis() + 48 * 60 * 60 * 1000; // 48 horas em milissegundos
+        user.setExpirationTime(expirationTime);
+        System.out.println("Expiration time: " + expirationTime);
+        user.setConfirmed(false);
+        boolean newPassword = emailBean.sendConfirmationEmail(user);
 
         if (isFieldEmpty) {
             response = Response.status(422).entity("There's an empty field. ALl fields must be filled in").build();
@@ -73,6 +85,8 @@ public class UserService {
             response = Response.status(422).entity("Image URL invalid").build(); //400
         } else if (!isPhoneNumberValid) {
             response = Response.status(422).entity("Invalid phone number").build();
+        } else if (!newPassword) {
+            response = Response.status(404).entity("Email not sent").build();
         } else if (userBean.register(user)) {
             response = Response.status(Response.Status.CREATED).entity("User registered successfully").build(); //status code 201
         } else {
@@ -225,6 +239,75 @@ public class UserService {
         }else
             return Response.status(401).entity("User is not logged in").build();
     }
+
+    @PUT
+    @Path("/{username}/password")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updatePassword(@PathParam("username") String username,
+                                   @HeaderParam("newpassword") String newPassword) {
+        User user = userBean.getUser(username);
+        System.out.println("user" + user);
+        if (user == null) {
+            return Response.status(404).entity("User with this username is not found").build();
+        }
+        long expirationTime = user.getExpirationTime();
+        long currentTime = System.currentTimeMillis();
+        System.out.println("Expiration time: " + expirationTime);
+        System.out.println("Current time: " + currentTime);
+        if (expirationTime !=0 && currentTime > expirationTime) {
+            return Response.status(401).entity("Link expired").build();
+        }
+        user.setConfirmed(true);
+        boolean updated = userBean.updatePassword(user.getUsername(), newPassword);
+        if (!updated) {
+            return Response.status(400).entity("User with this username is not found").build();
+        }
+        else return Response.status(200).entity("Password updated").build();
+    }
+
+    @POST
+    @Path("/recover-password")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response sendRecoverPasswordEmail(@HeaderParam("email") String email) {
+        // Verifica se email é igual ao email de algum user que exista na base de dados
+        User user = userBean.getUserByEmail(email);
+        if (user == null) {
+            return Response.status(404).entity("User with this email not found").build();
+        }
+        long expirationTime = System.currentTimeMillis() + 2 * 60 * 1000; // 2 minutos em milissegundos
+        user.setExpirationTime(expirationTime);
+        boolean newEmailNemPassword = emailBean.sendPasswordResetEmail(user);
+        if (!newEmailNemPassword) {
+            return Response.status(404).entity("Email not sent").build();
+        }
+        return Response.status(200).entity("Email sent").build();
+    }
+    @PUT
+    @Path("/{username}/reset-password")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response resetPassword(@PathParam("username") String username,
+                                   @HeaderParam("newpassword") String newPassword) {
+        User user = userBean.getUser(username);
+        System.out.println("user" + user);
+        if (user == null) {
+            return Response.status(404).entity("User with this username is not found").build();
+        } else if (!user.isConfirmed()) {
+            return Response.status(401).entity("User is not confirmed").build();
+        }
+        long expirationTime = user.getExpirationTime();
+        long currentTime = System.currentTimeMillis();
+        System.out.println("Expiration time: " + expirationTime);
+        System.out.println("Current time: " + currentTime);
+        if (expirationTime !=0 && currentTime > expirationTime) {
+            return Response.status(401).entity("Link expired").build();
+        }
+        boolean updated = userBean.updatePassword(user.getUsername(), newPassword);
+        if (!updated) {
+            return Response.status(400).entity("User with this username is not found").build();
+        }
+        return Response.status(200).entity("Password updated").build();
+    }
+
 
     @PUT
     @Path("/update/{username}/visibility")

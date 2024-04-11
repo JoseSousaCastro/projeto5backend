@@ -26,7 +26,7 @@ public class UserEntity implements Serializable{
     @Column(name="username", nullable=false, unique = true, updatable = false)
     private String username;
 
-    @Column(name="password", nullable=false, unique = false, updatable = true)
+    @Column(name="password", nullable=true, unique = false, updatable = true)
     private String password;
 
     @Column(name="type_of_user", nullable=false, unique = false, updatable = true)
@@ -52,6 +52,12 @@ public class UserEntity implements Serializable{
 
     @Column(name="visible", nullable = false, unique = false, updatable = true)
     private boolean visible;
+
+    @Column(name="expiration_time", nullable = true, unique = false, updatable = true)
+    private long expirationTime;
+
+    @Column(name="confirmed", nullable = false, unique = false, updatable = true)
+    private boolean confirmed;
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<TaskEntity> userTasks;
@@ -143,6 +149,19 @@ public class UserEntity implements Serializable{
     public boolean isVisible() {return visible;}
 
     public void setVisible(boolean visivel) {this.visible = visivel;}
+
+    public long getExpirationTime() {
+        return expirationTime;
+    }
+    public void setExpirationTime(long expirationTime) {
+        this.expirationTime = expirationTime;
+    }
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
 
     public void addNewTasks(ArrayList<TaskEntity> tasks) {
         for (TaskEntity task : tasks) {

@@ -37,6 +37,8 @@ public class LoggedUser {
     public static final int NOTASSIGNED = 400;
     @XmlElement
     private ArrayList<Task> userTasks = new ArrayList<>(); //ser array de ids das tasks assim as tasks ficavam no json das tasks
+    @XmlElement
+    private boolean confirmed;
 
     public LoggedUser() {
     }
@@ -139,6 +141,15 @@ public class LoggedUser {
     public void setToken(String token) {
         this.token = token;
     }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
+
+
     @Override
     public String toString() {
         return "User{" +

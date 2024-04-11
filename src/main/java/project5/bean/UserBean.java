@@ -33,7 +33,8 @@ public class UserBean implements Serializable {
 
 
     //Construtor vazio
-    public UserBean(){}
+    public UserBean() {
+    }
 
     public UserBean(UserDao userDao) {
         this.userDao = userDao;
@@ -51,6 +52,7 @@ public class UserBean implements Serializable {
             admin.setPhone("123456789");
             admin.setPhotoURL("https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png");
             admin.setVisible(false);
+            admin.setConfirmed(true);
 
             register(admin);
         }
@@ -67,6 +69,7 @@ public class UserBean implements Serializable {
             deletedUser.setPhotoURL("https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png");
             deletedUser.setTypeOfUser(400);
             deletedUser.setVisible(false);
+            deletedUser.setConfirmed(true);
 
             register(deletedUser);
         }
@@ -75,7 +78,9 @@ public class UserBean implements Serializable {
     //Permite ao utilizador entrar na app, gera token
     public LoggedUser login(Login user) {
         UserEntity userEntity = userDao.findUserByUsername(user.getUsername());
-        if (userEntity != null && userEntity.isVisible()) {
+        if (userEntity != null && userEntity.isVisible() && userEntity.isConfirmed()) {
+            System.out.println("Pass" + userEntity.getPassword());
+            System.out.println("Username" + userEntity.getUsername());
             //Verifica se a password coincide com a password encriptada
             if (BCrypt.checkpw(user.getPassword(), userEntity.getPassword())) {
                 String token = generateNewToken();
@@ -106,9 +111,9 @@ public class UserBean implements Serializable {
 
                 return true;
             } else {
-                if (user.getUsername().equals("admin")){
+                if (user.getUsername().equals("admin")) {
                     user.setTypeOfUser(300);
-                }else{
+                } else {
                     user.setInitialTypeOfUser();
                 }
 
@@ -166,6 +171,8 @@ public class UserBean implements Serializable {
         userEntity.setPhone(user.getPhone());
         userEntity.setPhotoURL(user.getPhotoURL());
         userEntity.setVisible(user.isVisible());
+        userEntity.setExpirationTime(user.getExpirationTime());
+        userEntity.setConfirmed(user.isConfirmed());
 
         return userEntity;
     }
@@ -181,6 +188,8 @@ public class UserBean implements Serializable {
         user.setPhone(userEntity.getPhone());
         user.setPhotoURL(userEntity.getPhotoURL());
         user.setVisible(userEntity.isVisible());
+        user.setConfirmed(userEntity.isConfirmed());
+        user.setExpirationTime(userEntity.getExpirationTime());
 
         return user;
     }
@@ -246,7 +255,7 @@ public class UserBean implements Serializable {
             ArrayList<User> users = new ArrayList<>();
             for (UserEntity userE : userEntities) {
 
-                if (userE.getTypeOfUser()!=400){
+                if (userE.getTypeOfUser() != 400) {
                     users.add(convertUserEntitytoUserDto(userE));
                 }
             }
@@ -321,7 +330,7 @@ public class UserBean implements Serializable {
 
         UserEntity u = userDao.findUserByUsername(username);
 
-        if (u!=null){
+        if (u != null) {
             return convertUserEntitytoUserDto(u);
         }
 
@@ -335,7 +344,7 @@ public class UserBean implements Serializable {
         // Busca o user pelo username
         UserEntity u = userDao.findUserByUsername(username);
 
-        if (u != null && u.getUsername().equals(username)){
+        if (u != null && u.getUsername().equals(username)) {
 
             // Verifica se o email no objeto User é nulo ou vazio
             if (user.getEmail() != null && !user.getEmail().isEmpty()) {
@@ -373,10 +382,10 @@ public class UserBean implements Serializable {
                 u.setTypeOfUser(user.getTypeOfUser());
             }
 
-            try{
+            try {
                 userDao.merge(u); //Atualiza o user na base de dados
                 status = true;
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 status = false;
             }
@@ -390,7 +399,7 @@ public class UserBean implements Serializable {
 
         UserEntity u = userDao.findUserByUsername(username);
 
-        if (u != null){
+        if (u != null) {
 
             u.setVisible(!u.isVisible());
 
@@ -405,7 +414,7 @@ public class UserBean implements Serializable {
 
         UserEntity u = userDao.findUserByUsername(username);
 
-        if (u != null && u.getTypeOfUser() != typeOfUser){
+        if (u != null && u.getTypeOfUser() != typeOfUser) {
 
             u.setTypeOfUser(typeOfUser);
 
@@ -459,7 +468,7 @@ public class UserBean implements Serializable {
     public boolean isEmailUpdatedValid(User user) {
 
         //Se for null é porque não houve nenhuma atualização
-        if (user.getEmail() == null || user.getEmail().isEmpty() || user.getEmail().isBlank()){
+        if (user.getEmail() == null || user.getEmail().isEmpty() || user.getEmail().isBlank()) {
             return true;
         }
 
@@ -477,7 +486,6 @@ public class UserBean implements Serializable {
         boolean status = false;
 
         if (user.getUsername().isEmpty() ||
-                user.getPassword().isEmpty() ||
                 user.getEmail().isEmpty() ||
                 user.getFirstName().isEmpty() ||
                 user.getLastName().isEmpty() ||
@@ -518,7 +526,7 @@ public class UserBean implements Serializable {
         boolean status = true;
 
         //Se for null é porque não houve nenhuma atualização
-        if (user.getPhone()==null){
+        if (user.getPhone() == null) {
             return true;
         }
 
@@ -675,41 +683,41 @@ public class UserBean implements Serializable {
 
 
     //Converte a Entidade com o token "token" para DTO
-    public User convertEntityByToken (String token){
+    public User convertEntityByToken(String token) {
 
         UserEntity currentUserEntity = userDao.findUserByToken(token);
         User currentUser = convertUserEntitytoUserDto(currentUserEntity);
 
-        if (currentUser != null){
+        if (currentUser != null) {
             return currentUser;
-        }else return null;
+        } else return null;
 
     }
 
     //Converte a Entidade com o email "email" para DTO
-    public User convertEntityByEmail (String email){
+    public User convertEntityByEmail(String email) {
 
         UserEntity userEntity = userDao.findUserByEmail(email);
         User user = convertUserEntitytoUserDto(userEntity);
 
-        if (user != null){
+        if (user != null) {
             return user;
-        }else return null;
+        } else return null;
 
     }
 
-    public boolean thisTokenIsFromThisUsername(String token, String username){
+    public boolean thisTokenIsFromThisUsername(String token, String username) {
 
-        if(userDao.findUserByToken(token).getUsername().equals(username)){
+        if (userDao.findUserByToken(token).getUsername().equals(username)) {
             return true;
-        }else return false;
+        } else return false;
 
     }
 
-    public boolean verifyOldPassword(String username, String oldPassword){
+    public boolean verifyOldPassword(String username, String oldPassword) {
 
         UserEntity user = userDao.findUserByUsername(username);
-        if (user!=null){
+        if (user != null) {
             return BCrypt.checkpw(oldPassword, user.getPassword());
         }
         return false;
@@ -724,9 +732,25 @@ public class UserBean implements Serializable {
 
             //Define a password encriptada
             user.setPassword(hashedPassword);
+            user.setExpirationTime(0);
             return true;
         }
         return false;
     }
 
+    public boolean confirmUser(UserEntity user) {
+        if (!user.isConfirmed()) {
+            return false;
+        }
+        userDao.merge(user);
+        return true;
+    }
+
+    public User getUserByEmail(String email) {
+        UserEntity userEntity = userDao.findUserByEmail(email);
+        if (userEntity != null) {
+            return convertUserEntitytoUserDto(userEntity);
+        }
+        return null;
+    }
 }
