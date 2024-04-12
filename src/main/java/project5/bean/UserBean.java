@@ -78,9 +78,7 @@ public class UserBean implements Serializable {
     //Permite ao utilizador entrar na app, gera token
     public LoggedUser login(Login user) {
         UserEntity userEntity = userDao.findUserByUsername(user.getUsername());
-        if (userEntity != null && userEntity.isVisible() && userEntity.isConfirmed()) {
-            System.out.println("Pass" + userEntity.getPassword());
-            System.out.println("Username" + userEntity.getUsername());
+        if (userEntity != null && userEntity.isVisible()) {
             //Verifica se a password coincide com a password encriptada
             if (BCrypt.checkpw(user.getPassword(), userEntity.getPassword())) {
                 String token = generateNewToken();

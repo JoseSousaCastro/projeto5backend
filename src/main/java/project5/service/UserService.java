@@ -255,6 +255,7 @@ public class UserService {
         System.out.println("Expiration time: " + expirationTime);
         System.out.println("Current time: " + currentTime);
         if (expirationTime !=0 && currentTime > expirationTime) {
+            user.setExpirationTime(0);
             return Response.status(401).entity("Link expired").build();
         }
         user.setConfirmed(true);
@@ -296,9 +297,9 @@ public class UserService {
         }
         long expirationTime = user.getExpirationTime();
         long currentTime = System.currentTimeMillis();
-        System.out.println("Expiration time: " + expirationTime);
-        System.out.println("Current time: " + currentTime);
+
         if (expirationTime !=0 && currentTime > expirationTime) {
+            user.setExpirationTime(0);
             return Response.status(401).entity("Link expired").build();
         }
         boolean updated = userBean.updatePassword(user.getUsername(), newPassword);
