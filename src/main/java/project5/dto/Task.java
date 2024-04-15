@@ -39,6 +39,8 @@ public class Task {
     public boolean erased;
     @XmlElement
     public User owner;
+    @XmlElement
+    public LocalDate doneDate;
 
     public Task() {
     }
@@ -147,4 +149,62 @@ public class Task {
     public void setErased(boolean erased) {
         this.erased = erased;
     }
+
+    public LocalDate getDoneDate() {
+        return doneDate;
+    }
+
+    public void setDoneDate(LocalDate doneDate) {
+        this.doneDate = doneDate;
+    }
+
+    public int getDoneMonth() {
+        if (doneDate != null) {
+            return doneDate.getMonthValue();
+        } else {
+            return 0; // Ou outra indicação de que a data de conclusão não está definida
+        }
+    }
+
+    public String getDoneMonthName() {
+        if (doneDate != null) {
+            int month = doneDate.getMonthValue();
+            switch (month) {
+                case 1:
+                    return "Jan";
+                case 2:
+                    return "Feb";
+                case 3:
+                    return "Mar";
+                case 4:
+                    return "Apr";
+                case 5:
+                    return "May";
+                case 6:
+                    return "Jun";
+                case 7:
+                    return "Jul";
+                case 8:
+                    return "Aug";
+                case 9:
+                    return "Sep";
+                case 10:
+                    return "Oct";
+                case 11:
+                    return "Nov";
+                case 12:
+                    return "Dec";
+            }
+        }
+        return "";
+    }
+
+public int getDoneYear() {
+    if (doneDate != null) {
+        return doneDate.getYear();
+    } else {
+        return 0; // Ou outra indicação de que a data de conclusão não está definida
+    }
+}
+
 }

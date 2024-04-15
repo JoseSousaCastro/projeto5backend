@@ -19,21 +19,17 @@ public class UserManagementScheduler {
         scheduler.scheduleAtFixedRate(this::deleteExpiredUsersTask, 0, 1, TimeUnit.HOURS);
     }
 
-    // Método que será executado periodicamente para eliminar usuários expirados
+    // Método para deletar usuários expirados
     private void deleteExpiredUsersTask() {
-        try {
-            // Obter a lista de usuários do banco de dados
-            List<User> users = userService.getAllUsers();
-            // Iterar sobre a lista de usuários expirados e excluí-los
-            for (User user : expiredUsers) {
-                userService.deleteUser(user.getUsername());
-                System.out.println("User with ID " + user.getUsername() + " has been deleted.");
+        // Obtenha a lista de usuários
+        List<User> users = new ArrayList<>();
+        // Para cada usuário na lista
+        for (User user : users) {
+            // Se o usuário estiver expirado
+            if (user.getExpirationTime() < System.currentTimeMillis()) {
+                // Remova o usuário
+                users.remove(user);
             }
-
-            System.out.println("Scheduled task to delete expired users executed successfully.");
-        } catch (Exception e) {
-            // Em caso de erro, registre a exceção
-            System.err.println("Error executing scheduled task: " + e.getMessage());
         }
     }
 

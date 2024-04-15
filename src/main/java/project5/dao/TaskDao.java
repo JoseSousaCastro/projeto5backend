@@ -85,4 +85,60 @@ public class TaskDao extends AbstractDao<TaskEntity> {
 		return deleted;
 	}
 
+	public ArrayList<TaskEntity> findTasksByUserAndStateId(UserEntity userEntity, int stateId) {
+		try {
+			return (ArrayList<TaskEntity>) em.createNamedQuery("Task.findTasksByUserAndStateId").setParameter("owner", userEntity).setParameter("stateId", stateId).getResultList();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public ArrayList<TaskEntity> findAllTasksByStateId(int stateId) {
+		try {
+			return (ArrayList<TaskEntity>) em.createNamedQuery("Task.findAllTasksByStateId").setParameter("stateId", stateId).getResultList();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public ArrayList<TaskEntity> findAllTasksNotErased() {
+		try {
+			return (ArrayList<TaskEntity>) em.createNamedQuery("Task.findAllTasksNotErased").getResultList();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public int getAverageTimeToCompleteTask(int totalDoneTasks, int daysFromStartDateToDoneDate) {
+		if (totalDoneTasks == 0) {
+			return 0;
+		} else {
+			return daysFromStartDateToDoneDate / totalDoneTasks;
+		}
+	}
+
+	public int daysFromStartDateToDoneDate(String id) {
+		try {
+			return (int) em.createNamedQuery("Task.daysFromStartDateToDoneDate").setParameter("id", id).getSingleResult();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public int getSumOfDaysFromStartDateToDoneDate() {
+		try {
+			return (int) em.createNamedQuery("Task.getSumOfDaysFromStartDateToDoneDate").getSingleResult();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public int getCumulativeNumberOfDoneTasksByMonth(int month) {
+		try {
+			return (int) em.createNamedQuery("Task.getCumulativeNumberOfDoneTasksByMonth").setParameter("month", month).getSingleResult();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
 }

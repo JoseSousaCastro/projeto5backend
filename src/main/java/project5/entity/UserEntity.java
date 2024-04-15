@@ -17,6 +17,9 @@ import java.util.Set;
 @NamedQuery(name = "User.findUserByPhone", query = "SELECT  u FROM UserEntity u WHERE u.phone = :phone")
 @NamedQuery(name = "User.findUserByToken", query = "SELECT DISTINCT u FROM UserEntity u WHERE u.token = :token")
 @NamedQuery(name = "User.findUserByUsernameAndPassword", query = "SELECT u FROM UserEntity u WHERE u.username = :username AND u.password = :password")
+@NamedQuery(name = "User.findAllUsersByIsConfirmed", query = "SELECT u FROM UserEntity u WHERE u.confirmed = :confirmed")
+@NamedQuery(name = "User.findAllConfirmedAndNotErasedUsers", query = "SELECT u FROM UserEntity u WHERE u.confirmed = true AND u.visible = true")
+@NamedQuery(name = "User.findAllUsersByMonthAndYear", query = "SELECT u FROM UserEntity u WHERE MONTH(u.creationDate) = :month AND YEAR(u.creationDate) = :year")
 public class UserEntity implements Serializable{
 
     private static final long serialVersionUID = 1L;

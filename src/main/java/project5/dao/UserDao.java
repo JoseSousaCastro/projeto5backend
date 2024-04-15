@@ -101,6 +101,29 @@ public class UserDao extends AbstractDao<UserEntity> {
 		}
 	}
 
+	public ArrayList<UserEntity> findAllUsersByIsConfirmed(boolean confirmed) {
+		try {
+			return (ArrayList<UserEntity>) em.createNamedQuery("User.findAllUsersByIsConfirmed").setParameter("confirmed", confirmed).getResultList();
+		} catch (Exception e) {
+			return null;
+		}
+	}
 
+	public ArrayList<UserEntity> findAllUsersByMonthAndYear(int month, int year) {
+		try {
+			return (ArrayList<UserEntity>) em.createNamedQuery("User.findAllUsersByMonthAndYear").setParameter("month", month)
+					.setParameter("year", year).getResultList();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public ArrayList<UserEntity> findAllConfirmedAndNotErasedUsers() {
+		try {
+			return (ArrayList<UserEntity>) em.createNamedQuery("User.findAllConfirmedAndNotErasedUsers").getResultList();
+		} catch (Exception e) {
+			return null;
+		}
+	}
 
 }

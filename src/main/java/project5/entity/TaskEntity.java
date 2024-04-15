@@ -14,8 +14,11 @@ import jakarta.persistence.*;
 @NamedQuery(name="Task.findErasedTasks", query="SELECT a FROM TaskEntity a WHERE a.erased = true ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findAllTasks", query="SELECT a FROM TaskEntity a ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="DeleteTask", query="DELETE FROM TaskEntity a WHERE a.id = :id")
-
-
+@NamedQuery(name="Task.findTasksByUserAndStateId", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name="Task.findAllTasksByStateId", query="SELECT a FROM TaskEntity a WHERE a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name="Task.findAllTasksNotErased", query="SELECT a FROM TaskEntity a WHERE a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name="Task.getSumOfDaysFromStartDateToDoneDate", query="SELECT SUM(DATEDIFF(a.doneDate, a.startDate)) FROM TaskEntity a WHERE a.owner = :owner AND a.stateId = 300")
+@NamedQuery(name="Task.getCumulativeNumberOfDoneTasksByMonth", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.stateId = 300 AND MONTH(a.doneDate) = :month AND YEAR(a.doneDate) = :year")
 public class TaskEntity implements Serializable{
 
     private static final long serialVersionUID = 1L;

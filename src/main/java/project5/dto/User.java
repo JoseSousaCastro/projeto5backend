@@ -3,6 +3,7 @@ package project5.dto;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 @XmlRootElement
@@ -39,6 +40,8 @@ public class User {
     private long expirationTime;
     @XmlElement
     private boolean confirmed;
+    @XmlElement
+    private LocalDate creationDate;
 
     public User() {
     }
@@ -147,6 +150,60 @@ public class User {
     }
     public void setConfirmed(boolean confirmed) {
         this.confirmed = confirmed;
+    }
+
+    public LocalDate getCreationDate() {
+        return creationDate;
+    }
+    public void setCreationDate(LocalDate creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public int getCreationMonth() {
+        if (creationDate != null) {
+            return creationDate.getMonthValue();
+        }
+        return 0;
+    }
+
+    public String getCreationMonthName() {
+        if (creationDate != null) {
+            int month = creationDate.getMonthValue();
+            switch (month) {
+                case 1:
+                    return "Jan";
+                case 2:
+                    return "Feb";
+                case 3:
+                    return "Mar";
+                case 4:
+                    return "Apr";
+                case 5:
+                    return "May";
+                case 6:
+                    return "Jun";
+                case 7:
+                    return "Jul";
+                case 8:
+                    return "Aug";
+                case 9:
+                    return "Sep";
+                case 10:
+                    return "Oct";
+                case 11:
+                    return "Nov";
+                case 12:
+                    return "Dec";
+            }
+        }
+        return "";
+    }
+
+    public int getCreationYear() {
+        if (creationDate != null) {
+            return creationDate.getYear();
+        }
+        return 0;
     }
 
     @Override

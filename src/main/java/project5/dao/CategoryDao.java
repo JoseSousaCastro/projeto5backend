@@ -39,8 +39,8 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
         }
     }
 
- public boolean deleteCategory(String name) {
-     System.out.println("############ CATEGORY DAO " + name);
+    public boolean deleteCategory(String name) {
+        System.out.println("############ CATEGORY DAO " + name);
         boolean deleted = false;
         if (name == null) {
             deleted = false;
@@ -78,5 +78,22 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
         }
         System.out.println("*********************** EDITED = " + edited + " ***********************");
         return edited;
+    }
+
+    public int getNumberOfTasksByCategory(String name) {
+        ArrayList<TaskEntity> tasks = findTasksByCategory(name);
+        if (tasks != null) {
+            return tasks.size();
+        } else {
+            return 0;
+        }
+    }
+
+    public ArrayList<CategoryEntity> findAllCategoriesFromMostFrequentToLeastFrequent() {
+        try {
+            return (ArrayList<CategoryEntity>) em.createNamedQuery("Category.findAllCategoriesFromMostFrequentToLeastFrequent").getResultList();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
