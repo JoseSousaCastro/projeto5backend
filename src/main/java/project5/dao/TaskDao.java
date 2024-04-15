@@ -1,10 +1,14 @@
 package project5.dao;
 
+import jakarta.persistence.Query;
+import project5.dto.TaskRegistrationInfo;
+import project5.entity.CategoryEntity;
 import project5.entity.TaskEntity;
 import project5.entity.UserEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 @Stateless
@@ -117,14 +121,6 @@ public class TaskDao extends AbstractDao<TaskEntity> {
 		}
 	}
 
-	public int daysFromStartDateToDoneDate(String id) {
-		try {
-			return (int) em.createNamedQuery("Task.daysFromStartDateToDoneDate").setParameter("id", id).getSingleResult();
-		} catch (Exception e) {
-			return 0;
-		}
-	}
-
 	public int getSumOfDaysFromStartDateToDoneDate() {
 		try {
 			return (int) em.createNamedQuery("Task.getSumOfDaysFromStartDateToDoneDate").getSingleResult();
@@ -133,11 +129,40 @@ public class TaskDao extends AbstractDao<TaskEntity> {
 		}
 	}
 
-	public int getCumulativeNumberOfDoneTasksByMonth(int month) {
+	public ArrayList<TaskRegistrationInfo> getTasksCompletedOverTime() {
+		ArrayList<TaskRegistrationInfo> completedInfoList = new ArrayList<>();
+
+		// Obtenha a data mínima e máxima das tasks completed
+		LocalDate minDate = (LocalDate) em.createQuery("SELECT MIN(a.doneDate) FROM TaskEntity a WHERE a.stateId = 300").getSingleResult();
+		LocalDate maxDate = (LocalDate) em.createQuery("SELECT MAX(a.doneDate) FROM TaskEntity a WHERE a.stateId = 300").getSingleResult();
+
+		// Inicialize o total acumulado
+		int accumulatedTotal = 0;
+
+		// Loop através de cada dia entre minDate e maxDate
+		for (LocalDate date = minDate; date.isBefore(maxDate.plusDays(1)); date = date.plusDays(1)) {
+			// Consulta para obter o número de tasks completed nesse dia
+			Query query = em.createNamedQuery("Task.findTasksCompletedOnDate");
+			query.setParameter("doneDate", date);
+			int count = query.getResultList().size();
+
+			// Adicione o número de tasks completed nesse dia ao total acumulado
+			accumulatedTotal += count;
+
+			// Adicione o total acumulado para este dia
+			completedInfoList.add(new TaskRegistrationInfo(date, accumulatedTotal));
+		}
+
+		return completedInfoList;
+	}
+
+
+
+			public ArrayList<CategoryEntity> getCategoriesFromMostFrequentToLeastFrequent() {
 		try {
-			return (int) em.createNamedQuery("Task.getCumulativeNumberOfDoneTasksByMonth").setParameter("month", month).getSingleResult();
+			return (ArrayList<CategoryEntity>) em.createNamedQuery("Task.getCategoriesFromMostFrequentToLeastFrequent").getResultList();
 		} catch (Exception e) {
-			return 0;
+			return null;
 		}
 	}
 

@@ -1,10 +1,7 @@
 package project5.service;
 
 import org.mindrot.jbcrypt.BCrypt;
-import project5.bean.CategoryBean;
-import project5.bean.EmailBean;
-import project5.bean.TaskBean;
-import project5.bean.UserBean;
+import project5.bean.*;
 import project5.dto.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -26,6 +23,8 @@ public class UserService {
     CategoryBean categoryBean;
     @Inject
     EmailBean emailBean;
+    @Inject
+    StatsBean statsBean;
 
 
     @POST
@@ -812,6 +811,69 @@ public class UserService {
                     response = Response.status(200).entity(allCategories).build();
             } catch (Exception e) {
                 response = Response.status(404).entity("Something went wrong. The categories were not found.").build();
+            }
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
+
+
+    @GET
+    @Path("/global-stats")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllStats(@HeaderParam("token") String token) {
+
+        Response response;
+
+        if (userBean.isAuthenticated(token)) {
+            try {
+                int totalUsers = statsBean.getNumberOfUsers();
+                int totalConfirmedUsers = statsBean.getNumberOfConfirmedUsers();
+                int totalUnconfirmedUsers = statsBean.getNumberOfUnconfirmedUsers();
+                ArrayList<UserRegistrationInfo> usersOverTime = statsBean.getUsersOverTime();
+
+                int totalTasks = statsBean.getNumberOfTasks();
+                int totalToDoTasks = statsBean.getNumberOfTodoTasks();
+                int totalDoingTasks = statsBean.getNumberOfDoingTasks();
+                int totalDoneTasks = statsBean.getNumberOfDoneTasks();
+                ArrayList<TaskRegistrationInfo> tasksCompletedOverTime = statsBean.getTasksCompletedOverTime();
+
+                double tasksPerUser = statsBean.getAverageNumberOfTasksPerUser();
+                double averageTaskTime = statsBean.getAverageTimeToCompleteTask();
+
+                ArrayList<Category> categoriesListDesc = statsBean.getNumberOfCategoriesFromMostFrequentToLeast();
+
+                response = Response.status(200).entity(new Stats(totalUsers, totalConfirmedUsers, totalUnconfirmedUsers, totalTasks, totalToDoTasks,
+                        totalDoingTasks, totalDoneTasks, tasksPerUser, averageTaskTime, categoriesListDesc, usersOverTime, tasksCompletedOverTime)).build();
+
+            } catch (Exception e) {
+                response = Response.status(404).entity("Something went wrong. The stats were not found.").build();
+            }
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/{username}/stats")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserStats(@HeaderParam("token") String token, @PathParam("username") String username) {
+
+        Response response;
+
+        if (userBean.isAuthenticated(token)) {
+            try {
+                int totalUserTasks = statsBean.getNumberOfTasksByUser(username);
+                int totalUserToDoTasks = statsBean.getNumberOfTodoTasksByUser(username);
+                int totalUserDoingTasks = statsBean.getNumberOfDoingTasksByUser(username);
+                int totalUserDoneTasks = statsBean.getNumberOfDoneTasksByUser(username);
+
+                response = Response.status(200).entity(new UserStats(totalUserTasks, totalUserToDoTasks, totalUserDoingTasks, totalUserDoneTasks)).build();
+
+            } catch (Exception e) {
+                response = Response.status(404).entity("Something went wrong. The stats were not found.").build();
             }
         } else {
             response = Response.status(401).entity("Invalid credentials").build();

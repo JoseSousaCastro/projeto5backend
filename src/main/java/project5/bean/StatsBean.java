@@ -3,9 +3,15 @@ package project5.bean;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import project5.dao.CategoryDao;
 import project5.dao.TaskDao;
 import project5.dao.UserDao;
+import project5.dto.TaskRegistrationInfo;
+import project5.dto.UserRegistrationInfo;
 
 @Stateless
 public class StatsBean implements Serializable{
@@ -37,9 +43,6 @@ public class StatsBean implements Serializable{
         return userDao.findAllUsersByIsConfirmed(false).size();
     }
 
-    public int getNumberOfUsersByMonth(int month, int year) {
-        return userDao.findAllUsersByMonthAndYear(month, year).size();
-    }
 
 
     // Tasks by user
@@ -78,11 +81,10 @@ public class StatsBean implements Serializable{
         return taskDao.findAllTasksByStateId(300).size();
     }
 
-    public int getCumulativeNumberOfDoneTasksByMonth(int month) {
-        return taskDao.getCumulativeNumberOfDoneTasksByMonth(month);
-    }
 
-    public int getAverageNumberOfTasksPerUserInPercentage() {
+
+
+    public double getAverageNumberOfTasksPerUser() {
         int totalTasks = taskDao.findAllTasksNotErased().size();
         int totalUsers = userDao.findAllConfirmedAndNotErasedUsers().size();
 
@@ -90,10 +92,9 @@ public class StatsBean implements Serializable{
         if (totalUsers == 0) {
             return 0; // Retorna 0 se não houver usuários ativos
         }
+        double roundedAverage = Math.round((double) totalTasks / totalUsers * 10.0) / 10.0;
 
-        double averagePercentage = ((double) totalTasks / totalUsers) * 100;
-        // Use Math.round() para arredondar o resultado para o inteiro mais próximo
-        return (int) Math.round(averagePercentage);
+        return roundedAverage;
     }
 
 
@@ -108,7 +109,18 @@ public class StatsBean implements Serializable{
 
 
     // Categories Stats
-    public int getNumberOfCategoriesFromMostFrequentToLeast() {
-        return categoryDao.findAllCategoriesFromMostFrequentToLeastFrequent().size();
+    public ArrayList getNumberOfCategoriesFromMostFrequentToLeast() {
+        return taskDao.getCategoriesFromMostFrequentToLeastFrequent();
     }
+
+    public ArrayList<UserRegistrationInfo> getUsersOverTime() {
+        return userDao.getUsersRegisteredOverTime();
+    }
+
+    public ArrayList<TaskRegistrationInfo> getTasksCompletedOverTime() {
+        return taskDao.getTasksCompletedOverTime();
+    }
+
+
+
 }

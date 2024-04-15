@@ -3,6 +3,7 @@ package project5.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ import java.util.Set;
 @NamedQuery(name = "User.findUserByUsernameAndPassword", query = "SELECT u FROM UserEntity u WHERE u.username = :username AND u.password = :password")
 @NamedQuery(name = "User.findAllUsersByIsConfirmed", query = "SELECT u FROM UserEntity u WHERE u.confirmed = :confirmed")
 @NamedQuery(name = "User.findAllConfirmedAndNotErasedUsers", query = "SELECT u FROM UserEntity u WHERE u.confirmed = true AND u.visible = true")
-@NamedQuery(name = "User.findAllUsersByMonthAndYear", query = "SELECT u FROM UserEntity u WHERE MONTH(u.creationDate) = :month AND YEAR(u.creationDate) = :year")
+@NamedQuery(name = "User.findUsersRegisteredOnDate", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.creationDate = :creationDate AND u.confirmed = true")
 public class UserEntity implements Serializable{
 
     private static final long serialVersionUID = 1L;
@@ -61,6 +62,9 @@ public class UserEntity implements Serializable{
 
     @Column(name="confirmed", nullable = false, unique = false, updatable = true)
     private boolean confirmed;
+
+    @Column(name="creation_date", nullable = false, unique = false, updatable = true)
+    private LocalDate creationDate;
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<TaskEntity> userTasks;
@@ -164,6 +168,22 @@ public class UserEntity implements Serializable{
     }
     public void setConfirmed(boolean confirmed) {
         this.confirmed = confirmed;
+    }
+
+    public LocalDate getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDate creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public String getCreationMonth() {
+        return String.valueOf(creationDate.getMonthValue());
+    }
+
+    public String getCreationYear() {
+        return String.valueOf(creationDate.getYear());
     }
 
     public void addNewTasks(ArrayList<TaskEntity> tasks) {

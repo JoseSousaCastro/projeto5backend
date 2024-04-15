@@ -18,7 +18,8 @@ import jakarta.persistence.*;
 @NamedQuery(name="Task.findAllTasksByStateId", query="SELECT a FROM TaskEntity a WHERE a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findAllTasksNotErased", query="SELECT a FROM TaskEntity a WHERE a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.getSumOfDaysFromStartDateToDoneDate", query="SELECT SUM(DATEDIFF(a.doneDate, a.startDate)) FROM TaskEntity a WHERE a.owner = :owner AND a.stateId = 300")
-@NamedQuery(name="Task.getCumulativeNumberOfDoneTasksByMonth", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.stateId = 300 AND MONTH(a.doneDate) = :month AND YEAR(a.doneDate) = :year")
+@NamedQuery(name="Task.findTasksCompletedOnDate", query="SELECT a FROM TaskEntity a WHERE a.doneDate = :doneDate AND a.stateId = 300")
+@NamedQuery(name="Task.getCategoriesFromMostFrequentToLeastFrequent", query="SELECT a.category, COUNT(a.category) FROM TaskEntity a WHERE a.erased = false GROUP BY a.category ORDER BY COUNT(a.category) DESC")
 public class TaskEntity implements Serializable{
 
     private static final long serialVersionUID = 1L;
@@ -49,6 +50,9 @@ public class TaskEntity implements Serializable{
 
     @Column (name="limitDate", nullable = false, unique = false, updatable = true)
     private LocalDate limitDate;
+
+    @Column (name="doneDate", nullable = true, unique = false, updatable = true)
+    private LocalDate doneDate;
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
@@ -145,6 +149,14 @@ public class TaskEntity implements Serializable{
 
     public void setLimitDate(LocalDate limitDate) {
         this.limitDate = limitDate;
+    }
+
+    public LocalDate getDoneDate() {
+        return doneDate;
+    }
+
+    public void setDoneDate(LocalDate doneDate) {
+        this.doneDate = doneDate;
     }
 
     public CategoryEntity getCategory() {
