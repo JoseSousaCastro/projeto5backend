@@ -3,6 +3,7 @@ package project5.dto;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 @XmlRootElement
@@ -39,6 +40,8 @@ public class LoggedUser {
     private ArrayList<Task> userTasks = new ArrayList<>(); //ser array de ids das tasks assim as tasks ficavam no json das tasks
     @XmlElement
     private boolean confirmed;
+    @XmlElement
+    private LocalDate creationDate;
 
     public LoggedUser() {
     }
@@ -147,6 +150,13 @@ public class LoggedUser {
     }
     public void setConfirmed(boolean confirmed) {
         this.confirmed = confirmed;
+    }
+
+    public LocalDate getCreationDate() {
+        return creationDate;
+    }
+    public void setCreationDate(LocalDate creationDate) {
+        this.creationDate = creationDate;
     }
 
 

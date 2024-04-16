@@ -1,9 +1,11 @@
 package project5.dto;
 
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import java.util.ArrayList;
 
+@XmlRootElement
 public class Stats {
 
     @XmlElement
@@ -34,7 +36,9 @@ public class Stats {
     public Stats() {
     }
 
-    public Stats(int totalUsers, int totalConfirmedUsers, int totalUnconfirmedUsers, int totalTasks, int totalToDoTasks, int totalDoingTasks, int totalDoneTasks, double tasksPerUser, double averageTaskTime, ArrayList<Category> categoriesListDesc, ArrayList<UserRegistrationInfo> usersOverTime, ArrayList<TaskRegistrationInfo> tasksCompletedOverTime) {
+    public Stats(int totalUsers, int totalConfirmedUsers, int totalUnconfirmedUsers, int totalTasks, int totalToDoTasks, int totalDoingTasks,
+                 int totalDoneTasks, double tasksPerUser, double averageTaskTime, ArrayList<Category> categoriesListDesc,
+                 ArrayList<UserRegistrationInfo> usersOverTime, ArrayList<TaskRegistrationInfo> tasksCompletedOverTime) {
         this.totalUsers = totalUsers;
         this.totalConfirmedUsers = totalConfirmedUsers;
         this.totalUnconfirmedUsers = totalUnconfirmedUsers;

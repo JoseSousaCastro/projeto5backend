@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import project5.entity.UserEntity;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,8 @@ public class UserService {
     public Response login(Login login) {
 
         LoggedUser loggedUser = userBean.login(login);
-        System.out.println("Logged user: " + loggedUser.getPassword() + loggedUser.getUsername());
+        System.out.println("Confirmed: " + loggedUser.isConfirmed());
+        System.out.println("Creation date: " + loggedUser.getCreationDate());
         Response response;
 
         if (loggedUser != null) {
@@ -72,6 +74,7 @@ public class UserService {
         user.setExpirationTime(expirationTime);
         System.out.println("Expiration time: " + expirationTime);
         user.setConfirmed(false);
+        user.setCreationDate(LocalDate.of(2021,1,1));
         boolean newPassword = emailBean.sendConfirmationEmail(user);
 
         if (isFieldEmpty) {
@@ -257,7 +260,6 @@ public class UserService {
             user.setExpirationTime(0);
             return Response.status(401).entity("Link expired").build();
         }
-        user.setConfirmed(true);
         boolean updated = userBean.updatePassword(user.getUsername(), newPassword);
         if (!updated) {
             return Response.status(400).entity("User with this username is not found").build();
@@ -820,7 +822,7 @@ public class UserService {
 
 
     @GET
-    @Path("/global-stats")
+    @Path("/stats")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllStats(@HeaderParam("token") String token) {
 
@@ -840,7 +842,7 @@ public class UserService {
                 ArrayList<TaskRegistrationInfo> tasksCompletedOverTime = statsBean.getTasksCompletedOverTime();
 
                 double tasksPerUser = statsBean.getAverageNumberOfTasksPerUser();
-                double averageTaskTime = statsBean.getAverageTimeToCompleteTask();
+                double averageTaskTime = statsBean.getAverageOfTaskTimes();
 
                 ArrayList<Category> categoriesListDesc = statsBean.getNumberOfCategoriesFromMostFrequentToLeast();
 

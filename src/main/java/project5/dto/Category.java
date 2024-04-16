@@ -1,7 +1,9 @@
 package project5.dto;
 
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 public class Category {
     @XmlElement
     private String name;

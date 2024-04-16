@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
 
@@ -53,6 +54,8 @@ public class UserBean implements Serializable {
             admin.setPhotoURL("https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png");
             admin.setVisible(false);
             admin.setConfirmed(true);
+            admin.setTypeOfUser(300);
+            admin.setCreationDate(LocalDate.of(2021, 1, 1));
 
             register(admin);
         }
@@ -70,6 +73,7 @@ public class UserBean implements Serializable {
             deletedUser.setTypeOfUser(400);
             deletedUser.setVisible(false);
             deletedUser.setConfirmed(true);
+            deletedUser.setCreationDate(LocalDate.of(2021, 1, 1));
 
             register(deletedUser);
         }
@@ -171,6 +175,7 @@ public class UserBean implements Serializable {
         userEntity.setVisible(user.isVisible());
         userEntity.setExpirationTime(user.getExpirationTime());
         userEntity.setConfirmed(user.isConfirmed());
+        userEntity.setCreationDate(user.getCreationDate());
 
         return userEntity;
     }
@@ -188,6 +193,7 @@ public class UserBean implements Serializable {
         user.setVisible(userEntity.isVisible());
         user.setConfirmed(userEntity.isConfirmed());
         user.setExpirationTime(userEntity.getExpirationTime());
+        user.setCreationDate(userEntity.getCreationDate());
 
         return user;
     }
@@ -204,6 +210,7 @@ public class UserBean implements Serializable {
         user.setPhotoURL(userEntity.getPhotoURL());
         user.setVisible(userEntity.isVisible());
         user.setToken(userEntity.getToken());
+
 
         return user;
     }
@@ -731,6 +738,8 @@ public class UserBean implements Serializable {
             //Define a password encriptada
             user.setPassword(hashedPassword);
             user.setExpirationTime(0);
+            user.setConfirmed(true);
+            user.setCreationDate(LocalDate.now());
             return true;
         }
         return false;

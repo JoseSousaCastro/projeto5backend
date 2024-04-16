@@ -4,6 +4,7 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import project5.dao.TaskDao;
 import project5.dao.UserDao;
 import project5.dto.TaskRegistrationInfo;
 import project5.dto.UserRegistrationInfo;
+import project5.entity.TaskEntity;
 
 @Stateless
 public class StatsBean implements Serializable{
@@ -98,14 +100,21 @@ public class StatsBean implements Serializable{
     }
 
 
-    public double getAverageTimeToCompleteTask() {
-        double averageTime = taskDao.getAverageTimeToCompleteTask(getNumberOfDoneTasks(), taskDao.getSumOfDaysFromStartDateToDoneDate());
+    public double getAverageOfTaskTimes () {
+        ArrayList<TaskEntity> tasks = taskDao.findAllCompletedTasks();
+        int totalTasks = tasks.size();
+        int sum = 0;
 
-        // Use Math.round() para arredondar o resultado para a décima mais próxima
-        double roundedAverage = Math.round(averageTime * 10.0) / 10.0;
+        for (TaskEntity task : tasks) {
+            sum += (int) ChronoUnit.DAYS.between(task.getStartDate(), task.getDoneDate());
+        }
 
-        return roundedAverage;
+        if (totalTasks == 0) {
+            return 0;
+        } else
+            return sum / totalTasks;
     }
+
 
 
     // Categories Stats
