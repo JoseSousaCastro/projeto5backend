@@ -1,13 +1,11 @@
 package project5.service;
 
-import org.mindrot.jbcrypt.BCrypt;
 import project5.bean.*;
 import project5.dto.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import project5.entity.UserEntity;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -833,18 +831,18 @@ public class UserService {
                 int totalUsers = statsBean.getNumberOfUsers();
                 int totalConfirmedUsers = statsBean.getNumberOfConfirmedUsers();
                 int totalUnconfirmedUsers = statsBean.getNumberOfUnconfirmedUsers();
-                ArrayList<UserRegistrationInfo> usersOverTime = statsBean.getUsersOverTime();
+                ArrayList<RegistInfoUser> usersOverTime = statsBean.getSumOfUsersPerMonth();
 
                 int totalTasks = statsBean.getNumberOfTasks();
                 int totalToDoTasks = statsBean.getNumberOfTodoTasks();
                 int totalDoingTasks = statsBean.getNumberOfDoingTasks();
                 int totalDoneTasks = statsBean.getNumberOfDoneTasks();
-                ArrayList<TaskRegistrationInfo> tasksCompletedOverTime = statsBean.getTasksCompletedOverTime();
+                ArrayList<RegistInfoTask> tasksCompletedOverTime = statsBean.getSumOfCompletedTasksPerMonth();
 
                 double tasksPerUser = statsBean.getAverageNumberOfTasksPerUser();
                 double averageTaskTime = statsBean.getAverageOfTaskTimes();
 
-                ArrayList<Category> categoriesListDesc = statsBean.getNumberOfCategoriesFromMostFrequentToLeast();
+                ArrayList<RegistInfoCategory> categoriesListDesc = statsBean.getNumberOfCategoriesFromMostFrequentToLeast();
 
                 response = Response.status(200).entity(new Stats(totalUsers, totalConfirmedUsers, totalUnconfirmedUsers, totalTasks, totalToDoTasks,
                         totalDoingTasks, totalDoneTasks, tasksPerUser, averageTaskTime, categoriesListDesc, usersOverTime, tasksCompletedOverTime)).build();

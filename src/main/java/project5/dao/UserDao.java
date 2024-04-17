@@ -1,12 +1,9 @@
 package project5.dao;
 
-import jakarta.persistence.Query;
-import project5.dto.UserRegistrationInfo;
 import project5.entity.UserEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 @Stateless
@@ -120,35 +117,7 @@ public class UserDao extends AbstractDao<UserEntity> {
 		}
 	}
 
-	public ArrayList<UserRegistrationInfo> getUsersRegisteredOverTime() {
-		ArrayList<UserRegistrationInfo> registrationInfoList = new ArrayList<>();
 
-		// Obtenha a data mínima e máxima dos registros de usuários confirmados
-		LocalDate minDate = (LocalDate) em.createQuery("SELECT MIN(u.creationDate) FROM UserEntity u WHERE u.confirmed = true").getSingleResult();
-		LocalDate maxDate = (LocalDate) em.createQuery("SELECT MAX(u.creationDate) FROM UserEntity u WHERE u.confirmed = true").getSingleResult();
-
-		// Inicialize o total acumulado
-		long accumulatedTotal = 0;
-
-		// Loop através de cada dia entre minDate e maxDate
-		for (LocalDate date = minDate; date.isBefore(maxDate.plusDays(1)); date = date.plusDays(1)) {
-			// Consulta para obter o número de usuários registrados nesse dia
-			Query query = em.createNamedQuery("User.findUsersRegisteredOnDate");
-			query.setParameter("creationDate", date);
-			Long count = (Long ) query.getSingleResult();
-
-			// Converta o resultado para int
-			int countInt = count != null ? count.intValue() : 0;
-
-			// Adicione o total acumulado para este dia
-			accumulatedTotal += countInt;
-
-			// Adicione a informação do registro para este dia à lista
-			registrationInfoList.add(new UserRegistrationInfo(date, (int) accumulatedTotal));
-		}
-
-		return registrationInfoList;
-	}
 
 
 

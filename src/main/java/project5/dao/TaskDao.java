@@ -1,16 +1,12 @@
 package project5.dao;
 
-import jakarta.persistence.Query;
-import project5.dto.TaskRegistrationInfo;
+import jakarta.ejb.Stateless;
+import jakarta.persistence.NoResultException;
 import project5.entity.CategoryEntity;
 import project5.entity.TaskEntity;
 import project5.entity.UserEntity;
-import jakarta.ejb.Stateless;
-import jakarta.persistence.NoResultException;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.sql.Timestamp;
 
 @Stateless
 public class TaskDao extends AbstractDao<TaskEntity> {
@@ -123,38 +119,9 @@ public class TaskDao extends AbstractDao<TaskEntity> {
     }
 
 
-    public ArrayList<TaskRegistrationInfo> getTasksCompletedOverTime() {
-        ArrayList<TaskRegistrationInfo> completedInfoList = new ArrayList<>();
 
-        // Obtenha a data mínima e máxima das tasks completed
-        Timestamp minTimestamp = (Timestamp) em.createQuery("SELECT MIN(a.doneDate) FROM TaskEntity a WHERE a.stateId = 300").getSingleResult();
-        Timestamp maxTimestamp = (Timestamp) em.createQuery("SELECT MAX(a.doneDate) FROM TaskEntity a WHERE a.stateId = 300").getSingleResult();
 
-        // Verifique se os resultados não são nulos antes de converter para LocalDateTime
-        if (minTimestamp != null && maxTimestamp != null) {
-            LocalDate minDate = minTimestamp.toLocalDateTime().toLocalDate();
-            LocalDate maxDate = maxTimestamp.toLocalDateTime().toLocalDate();
 
-            // Inicialize o total acumulado
-            int accumulatedTotal = 0;
-
-            // Loop através de cada dia entre minDate e maxDate
-            for (LocalDate date = minDate; date.isBefore(maxDate.plusDays(1)); date = date.plusDays(1)) {
-                // Consulta para obter o número de tasks completed nesse dia
-                Query query = em.createNamedQuery("Task.findTasksCompletedOnDate");
-                query.setParameter("doneDate", date);
-                int count = query.getResultList().size();
-
-                // Adicione o número de tasks completed nesse dia ao total acumulado
-                accumulatedTotal += count;
-
-                // Adicione o total acumulado para este dia
-                completedInfoList.add(new TaskRegistrationInfo(date, accumulatedTotal));
-            }
-        }
-
-        return completedInfoList;
-    }
 
 
     public ArrayList<CategoryEntity> getCategoriesFromMostFrequentToLeastFrequent() {

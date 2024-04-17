@@ -15,9 +15,10 @@ import jakarta.persistence.*;
 @NamedQuery(name="Task.findAllTasks", query="SELECT a FROM TaskEntity a ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="DeleteTask", query="DELETE FROM TaskEntity a WHERE a.id = :id")
 @NamedQuery(name="Task.findTasksByUserAndStateId", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.findAllTasksByStateId", query="SELECT a FROM TaskEntity a WHERE a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name="Task.findAllTasksByStateId", query="SELECT a FROM TaskEntity a WHERE a.stateId = :stateId AND a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findAllTasksNotErased", query="SELECT a FROM TaskEntity a WHERE a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findAllCompletedTasks", query="SELECT a FROM TaskEntity a WHERE a.stateId = 300 AND a.erased = false ORDER BY a.doneDate DESC")
+
 @NamedQuery(name="Task.findTasksCompletedOnDate", query="SELECT a FROM TaskEntity a WHERE a.doneDate = :doneDate AND a.stateId = 300 AND a.erased = false AND a.id = :id")
 @NamedQuery(name="Task.getCategoriesFromMostFrequentToLeastFrequent", query="SELECT a.category, COUNT(a.category) FROM TaskEntity a WHERE a.erased = false GROUP BY a.category ORDER BY COUNT(a.category) DESC")
 public class TaskEntity implements Serializable{

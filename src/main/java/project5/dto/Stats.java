@@ -27,18 +27,18 @@ public class Stats {
     @XmlElement
     double averageTaskTime;
     @XmlElement
-    ArrayList<Category> categoriesListDesc;
+    ArrayList<RegistInfoCategory> categoriesListDesc;
     @XmlElement
-    ArrayList<UserRegistrationInfo> usersOverTime;
+    ArrayList<RegistInfoUser> usersOverTime;
     @XmlElement
-    ArrayList<TaskRegistrationInfo> tasksCompletedOverTime;
+    ArrayList<RegistInfoTask> tasksCompletedOverTime;
 
     public Stats() {
     }
 
     public Stats(int totalUsers, int totalConfirmedUsers, int totalUnconfirmedUsers, int totalTasks, int totalToDoTasks, int totalDoingTasks,
-                 int totalDoneTasks, double tasksPerUser, double averageTaskTime, ArrayList<Category> categoriesListDesc,
-                 ArrayList<UserRegistrationInfo> usersOverTime, ArrayList<TaskRegistrationInfo> tasksCompletedOverTime) {
+                 int totalDoneTasks, double tasksPerUser, double averageTaskTime, ArrayList<RegistInfoCategory> categoriesListDesc,
+                 ArrayList<RegistInfoUser> usersOverTime, ArrayList<RegistInfoTask> tasksCompletedOverTime) {
         this.totalUsers = totalUsers;
         this.totalConfirmedUsers = totalConfirmedUsers;
         this.totalUnconfirmedUsers = totalUnconfirmedUsers;
@@ -125,27 +125,27 @@ public class Stats {
         this.averageTaskTime = averageTaskTime;
     }
 
-    public ArrayList<Category> getCategoriesListDesc() {
+    public ArrayList<RegistInfoCategory> getCategoriesListDesc() {
         return categoriesListDesc;
     }
 
-    public void setCategoriesListDesc(ArrayList<Category> categoriesListDesc) {
+    public void setCategoriesListDesc(ArrayList<RegistInfoCategory> categoriesListDesc) {
         this.categoriesListDesc = categoriesListDesc;
     }
 
-    public ArrayList<UserRegistrationInfo> getUsersOverTime() {
+    public ArrayList<RegistInfoUser> getUsersOverTime() {
         return usersOverTime;
     }
 
-    public void setUsersOverTime(ArrayList<UserRegistrationInfo> usersOverTime) {
+    public void setUsersOverTime(ArrayList<RegistInfoUser> usersOverTime) {
         this.usersOverTime = usersOverTime;
     }
 
-    public ArrayList<TaskRegistrationInfo> getTasksCompletedOverTime() {
+    public ArrayList<RegistInfoTask> getTasksCompletedOverTime() {
         return tasksCompletedOverTime;
     }
 
-    public void setTasksCompletedOverTime(ArrayList<TaskRegistrationInfo> tasksCompletedOverTime) {
+    public void setTasksCompletedOverTime(ArrayList<RegistInfoTask> tasksCompletedOverTime) {
         this.tasksCompletedOverTime = tasksCompletedOverTime;
     }
 }
