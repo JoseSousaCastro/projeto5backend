@@ -8,17 +8,17 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "chat_messages")
 @NamedQuery(name = "ChatMessage.findChatMessageById", query = "SELECT c FROM ChatMessageEntity c WHERE c.id = :id")
-@NamedQuery(name = "ChatMessage.findChatMessageIsRead", query = "SELECT c FROM ChatMessageEntity c WHERE c.sender = :sender " +
-        "AND c.receiver = :receiver AND c.isRead = false")
-@NamedQuery(name = "ChatMessage.findAllChatMessagesBetweenUsers", query = "SELECT c FROM ChatMessageEntity c WHERE (c.sender = :sender " +
-        "AND c.receiver = :receiver) OR (c.sender = :receiver AND c.receiver = :sender) ORDER BY c.sentAt ASC")
-@NamedQuery(name = "ChatMessage.findAllUnreadChatMessages", query = "SELECT c FROM ChatMessageEntity c WHERE c.receiver = :receiver " +
+@NamedQuery(name = "ChatMessage.findChatMessageIsRead", query = "SELECT c FROM ChatMessageEntity c WHERE c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver AND c.isRead = false")
+@NamedQuery(name = "ChatMessage.findAllChatMessagesBetweenUsers", query = "SELECT c FROM ChatMessageEntity c WHERE (c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver) OR (c.sender.username = :receiver AND c.receiver.username = :sender) ORDER BY c.sentAt ASC")
+@NamedQuery(name = "ChatMessage.findAllUnreadChatMessages", query = "SELECT c FROM ChatMessageEntity c WHERE c.receiver.username = :receiver " +
         "AND c.isRead = false")
-@NamedQuery(name = "ChatMessage.markAllChatMessagesAsRead", query = "UPDATE ChatMessageEntity c SET c.isRead = true WHERE c.sender = :sender " +
-        "AND c.receiver = :receiver")
-@NamedQuery(name = "ChatMessage.findLatestChatMessage", query = "SELECT c FROM ChatMessageEntity c WHERE (c.sender = :sender " +
-        "AND c.receiver = :receiver) AND c.sentAt = (SELECT MAX(c.sentAt) FROM ChatMessageEntity c WHERE (c.sender = :sender " +
-        "AND c.receiver = :receiver))")
+@NamedQuery(name = "ChatMessage.markAllChatMessagesAsRead", query = "UPDATE ChatMessageEntity c SET c.isRead = true WHERE c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver")
+@NamedQuery(name = "ChatMessage.findLatestChatMessage", query = "SELECT c FROM ChatMessageEntity c WHERE (c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver) AND c.sentAt = (SELECT MAX(c.sentAt) FROM ChatMessageEntity c WHERE (c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver))")
 public class ChatMessageEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

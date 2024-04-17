@@ -8,18 +8,19 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "chat_notifications")
 @NamedQuery(name = "ChatNotification.findChatNotificationById", query = "SELECT c FROM ChatNotificationEntity c WHERE c.id = :id")
-@NamedQuery(name = "ChatNotification.findChatNotificationIsRead", query = "SELECT c FROM ChatNotificationEntity c WHERE c.sender = :sender " +
-        "AND c.receiver = :receiver AND c.isRead = false")
-@NamedQuery(name = "ChatNotification.findAllChatNotificationsNotRead", query = "SELECT c FROM ChatNotificationEntity c WHERE c.receiver = :receiver " +
+@NamedQuery(name = "ChatNotification.findChatNotificationIsRead", query = "SELECT c FROM ChatNotificationEntity c WHERE c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver AND c.isRead = false")
+@NamedQuery(name = "ChatNotification.findAllChatNotificationsNotRead", query = "SELECT c FROM ChatNotificationEntity c WHERE c.receiver.username = :receiver " +
         "AND c.isRead = false")
 @NamedQuery(name = "ChatNotification.countAllChatNotificationsNotRead", query = "SELECT COUNT(c) FROM ChatNotificationEntity c " +
-        "WHERE c.receiver = :receiver AND c.isRead = false")
-@NamedQuery(name = "ChatNotification.findUnreadChatNotifications", query = "SELECT c FROM ChatNotificationEntity c WHERE c.receiver = :receiver " +
+        "WHERE c.receiver.username = :receiver AND c.isRead = false")
+@NamedQuery(name = "ChatNotification.findUnreadChatNotifications", query = "SELECT c FROM ChatNotificationEntity c WHERE c.receiver.username = :receiver " +
         "AND c.isRead = false")
 @NamedQuery(name = "ChatNotification.markChatNotificationAsRead", query = "UPDATE ChatNotificationEntity c SET c.isRead = true " +
-        "WHERE c.sender = :sender AND c.receiver = :receiver")
+        "WHERE c.sender.username = :sender AND c.receiver.username = :receiver")
 @NamedQuery(name = "ChatNotification.dontShowChatNotification", query = "UPDATE ChatNotificationEntity c SET c.isRead = true " +
-        "WHERE c.sender = :sender AND c.receiver = :receiver AND c.isRead = false")
+        "WHERE c.sender.username = :sender AND c.receiver.username = :receiver AND c.isRead = false")
+@NamedQuery(name = "ChatNotification.findAllChatNotificationsByReceiver", query = "SELECT c FROM ChatNotificationEntity c WHERE c.receiver.username = :receiver")
 public class ChatNotificationEntity implements Serializable{
 
     private static final long serialVersionUID = 1L;

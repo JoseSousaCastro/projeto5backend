@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 
 @Stateless
-public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity>{
+public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity> {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,11 +29,11 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity>{
     public ChatNotificationEntity findChatNotificationIsRead(String senderUsername, String receiverUsername) {
         try {
             return (ChatNotificationEntity) em.createNamedQuery("ChatNotification.findChatNotificationIsRead")
-                    .setParameter("senderUsername", senderUsername)
-                    .setParameter("receiverUsername", receiverUsername)
+                    .setParameter("sender", senderUsername)
+                    .setParameter("receiver", receiverUsername)
                     .getSingleResult();
 
-        } catch (Exception e) {
+        } catch (NoResultException e) {
             return null;
         }
     }
@@ -41,7 +41,7 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity>{
     public ArrayList<ChatNotificationEntity> findAllChatNotificationsNotRead(String receiverUsername) {
         try {
             return new ArrayList<>(em.createNamedQuery("ChatNotification.findAllChatNotificationsNotRead", ChatNotificationEntity.class)
-                    .setParameter("receiverUsername", receiverUsername)
+                    .setParameter("receiver", receiverUsername)
                     .getResultList());
         } catch (NoResultException e) {
             return new ArrayList<>();
@@ -51,7 +51,7 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity>{
     public int countAllChatNotificationsNotRead(String receiverUsername) {
         try {
             return ((Number) em.createNamedQuery("ChatNotification.countAllChatNotificationsNotRead")
-                    .setParameter("receiverUsername", receiverUsername)
+                    .setParameter("receiver", receiverUsername)
                     .getSingleResult()).intValue();
         } catch (NoResultException e) {
             return 0;
@@ -61,7 +61,7 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity>{
     public void markAllChatNotificationsAsRead(String receiverUsername) {
         ArrayList<ChatNotificationEntity> unreadNotifications = new ArrayList<>(em.createNamedQuery("ChatNotification.findUnreadChatNotifications",
                         ChatNotificationEntity.class)
-                .setParameter("receiverUsername", receiverUsername)
+                .setParameter("receiver", receiverUsername)
                 .getResultList());
 
         if (!unreadNotifications.isEmpty()) {
@@ -81,15 +81,41 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity>{
 
     public void markChatNotificationAsRead(String senderUsername, String receiverUsername) {
         em.createNamedQuery("ChatNotification.markChatNotificationAsRead")
-                .setParameter("senderUsername", senderUsername)
-                .setParameter("receiverUsername", receiverUsername)
+                .setParameter("sender", senderUsername)
+                .setParameter("receiver", receiverUsername)
                 .executeUpdate();
     }
 
     public void dontShowChatNotification(String senderUsername, String receiverUsername) {
         em.createNamedQuery("ChatNotification.dontShowChatNotification")
-                .setParameter("senderUsername", senderUsername)
-                .setParameter("receiverUsername", receiverUsername)
+                .setParameter("sender", senderUsername)
+                .setParameter("receiver", receiverUsername)
                 .executeUpdate();
+    }
+
+    public ArrayList<ChatNotificationEntity> findAllChatNotificationsByReceiver(String receiverUsername) {
+        try {
+            return new ArrayList<>(em.createNamedQuery("ChatNotification.findAllChatNotificationsByReceiver", ChatNotificationEntity.class)
+                    .setParameter("receiver", receiverUsername)
+                    .getResultList());
+        } catch (NoResultException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    public void update(ChatNotificationEntity notification) {
+        if (notification != null) {
+            em.merge(notification);
+        } else {
+            System.out.println("Error: ChatNotificationEntity is null");
+        }
+    }
+
+    public void create(ChatNotificationEntity notificationEntity) {
+        if (notificationEntity != null) {
+            em.persist(notificationEntity);
+        } else {
+            System.out.println("Error: ChatNotificationEntity is null");
+        }
     }
 }

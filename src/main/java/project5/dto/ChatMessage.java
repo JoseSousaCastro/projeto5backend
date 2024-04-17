@@ -4,28 +4,37 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.time.LocalDateTime;
 
-@XmlRootElement(name = "ChatMessage")
-public class ChatMessageDTO {
+@XmlRootElement
+public class ChatMessage {
 
-    @XmlElement(name = "Id")
+    @XmlElement
     private Long id;
 
-    @XmlElement(name = "SenderUsername")
+    @XmlElement
     private String senderUsername;
 
-    @XmlElement(name = "ReceiverUsername")
+    @XmlElement
     private String receiverUsername;
 
-    @XmlElement(name = "Message")
+    @XmlElement
     private String message;
 
-    @XmlElement(name = "SentAt")
+    @XmlElement
     private LocalDateTime sentAt;
 
-    @XmlElement(name = "IsRead")
+    @XmlElement
     private boolean isRead;
 
-    public ChatMessageDTO() {
+    public ChatMessage() {
+    }
+
+    public ChatMessage(Long id, String senderUsername, String receiverUsername, String message, LocalDateTime sentAt, boolean isRead) {
+        this.id = id;
+        this.senderUsername = senderUsername;
+        this.receiverUsername = receiverUsername;
+        this.message = message;
+        this.sentAt = sentAt;
+        this.isRead = isRead;
     }
 
     public Long getId() {
@@ -75,4 +84,5 @@ public class ChatMessageDTO {
     public void setRead(boolean read) {
         isRead = read;
     }
+
 }

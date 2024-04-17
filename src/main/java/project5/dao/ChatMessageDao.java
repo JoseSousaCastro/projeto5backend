@@ -29,8 +29,8 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
     public ChatMessageEntity findChatMessageIsRead(String senderUsername, String receiverUsername) {
         try {
             return (ChatMessageEntity) em.createNamedQuery("ChatMessage.findChatMessageIsRead")
-                    .setParameter("senderUsername", senderUsername)
-                    .setParameter("receiverUsername", receiverUsername)
+                    .setParameter("sender", senderUsername)
+                    .setParameter("receiver", receiverUsername)
                     .getSingleResult();
 
         } catch (NoResultException e) {
@@ -40,9 +40,9 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
 
     public ArrayList<ChatMessageEntity> findAllChatMessagesBetweenUsers(String senderUsername, String receiverUsername) {
         try {
-            return (ArrayList<ChatMessageEntity>) em.createNamedQuery("ChatMessage.findAllChatMessagesBetweenUsers")
-                    .setParameter("senderUsername", senderUsername)
-                    .setParameter("receiverUsername", receiverUsername)
+            return (ArrayList<ChatMessageEntity>) em.createNamedQuery("ChatMessage.findAllChatMessagesBetweenUsers", ChatMessageEntity.class)
+                    .setParameter("sender", senderUsername)
+                    .setParameter("receiver", receiverUsername)
                     .getResultList();
         } catch (NoResultException e) {
             return new ArrayList<>(); // Retorna uma lista vazia se não houver resultados
@@ -53,7 +53,7 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
     public ArrayList<ChatMessageEntity> findAllUnreadChatMessages(String receiverUsername) {
         try {
             return new ArrayList<>(em.createNamedQuery("ChatMessage.findAllUnreadChatMessages", ChatMessageEntity.class)
-                    .setParameter("receiverUsername", receiverUsername)
+                    .setParameter("receiver", receiverUsername)
                     .getResultList());
         } catch (NoResultException e) {
             return new ArrayList<>();
@@ -68,8 +68,8 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
             if (latestMessage != null) {
                 // Marca todas as mensagens anteriores como lidas
                 em.createQuery("UPDATE ChatMessageEntity c SET c.isRead = true " +
-                                "WHERE c.senderUsername = :senderUsername " +
-                                "AND c.receiverUsername = :receiverUsername " +
+                                "WHERE c.sender = :senderUsername " +
+                                "AND c.receiver = :receiverUsername " +
                                 "AND c.sentAt < :latestSentAt")
                         .setParameter("senderUsername", senderUsername)
                         .setParameter("receiverUsername", receiverUsername)
@@ -85,13 +85,19 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
     private ChatMessageEntity findLatestChatMessage(String senderUsername, String receiverUsername) {
         try {
             return (ChatMessageEntity) em.createNamedQuery("ChatMessage.findLatestChatMessage")
-                    .setParameter("senderUsername", senderUsername)
-                    .setParameter("receiverUsername", receiverUsername)
+                    .setParameter("sender", senderUsername)
+                    .setParameter("receiver", receiverUsername)
                     .getSingleResult();
         } catch (NoResultException e) {
             return null;
         }
     }
 
-
+    public void create(ChatMessageEntity messageEntity) {
+        if (messageEntity != null) {
+            em.persist(messageEntity);
+        } else {
+            System.out.println("Error: messageEntity is null");
+        }
+    }
 }
