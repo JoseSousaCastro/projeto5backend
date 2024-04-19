@@ -72,7 +72,7 @@ public class UserService {
         user.setExpirationTime(expirationTime);
         System.out.println("Expiration time: " + expirationTime);
         user.setConfirmed(false);
-        user.setCreationDate(LocalDate.of(2021,1,1));
+        user.setCreationDate(LocalDate.of(2021, 1, 1));
         boolean newPassword = emailBean.sendConfirmationEmail(user);
 
         if (isFieldEmpty) {
@@ -190,12 +190,12 @@ public class UserService {
 
         User userUpdate = userBean.getUser(username);
 
-        if (userUpdate==null){
+        if (userUpdate == null) {
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             return response;
         }
 
-        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token) || userBean.thisTokenIsFromThisUsername(token,username)) {
+        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token) || userBean.thisTokenIsFromThisUsername(token, username)) {
             if (!userBean.isEmailUpdatedValid(user) && user.getEmail() != null) {
                 response = Response.status(422).entity("Invalid email").build();
 
@@ -209,7 +209,7 @@ public class UserService {
                 boolean updatedUser = userBean.updateUser(user, username);
                 response = Response.status(Response.Status.OK).entity(updatedUser).build(); //status code 200
             }
-        }else {
+        } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -225,7 +225,7 @@ public class UserService {
                                    @HeaderParam("newpassword") String newPassword) {
 
         //Verica se user está autentificado
-        if (userBean.isAuthenticated(token)){
+        if (userBean.isAuthenticated(token)) {
             // Verificar password antiga
             boolean isOldPasswordValid = userBean.verifyOldPassword(username, oldPassword);
             if (!isOldPasswordValid) {
@@ -235,8 +235,8 @@ public class UserService {
             boolean updated = userBean.updatePassword(username, newPassword);
             if (!updated) {
                 return Response.status(400).entity("User with this username is not found").build();
-            }else return Response.status(200).entity("User password updated").build();
-        }else
+            } else return Response.status(200).entity("User password updated").build();
+        } else
             return Response.status(401).entity("User is not logged in").build();
     }
 
@@ -254,15 +254,14 @@ public class UserService {
         long currentTime = System.currentTimeMillis();
         System.out.println("Expiration time: " + expirationTime);
         System.out.println("Current time: " + currentTime);
-        if (expirationTime !=0 && currentTime > expirationTime) {
+        if (expirationTime != 0 && currentTime > expirationTime) {
             user.setExpirationTime(0);
             return Response.status(401).entity("Link expired").build();
         }
         boolean updated = userBean.updatePassword(user.getUsername(), newPassword);
         if (!updated) {
             return Response.status(400).entity("User with this username is not found").build();
-        }
-        else return Response.status(200).entity("Password updated").build();
+        } else return Response.status(200).entity("Password updated").build();
     }
 
     @POST
@@ -282,11 +281,12 @@ public class UserService {
         }
         return Response.status(200).entity("Email sent").build();
     }
+
     @PUT
     @Path("/{username}/reset-password")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response resetPassword(@PathParam("username") String username,
-                                   @HeaderParam("newpassword") String newPassword) {
+                                  @HeaderParam("newpassword") String newPassword) {
         User user = userBean.getUser(username);
         System.out.println("user" + user);
         if (user == null) {
@@ -297,7 +297,7 @@ public class UserService {
         long expirationTime = user.getExpirationTime();
         long currentTime = System.currentTimeMillis();
 
-        if (expirationTime !=0 && currentTime > expirationTime) {
+        if (expirationTime != 0 && currentTime > expirationTime) {
             user.setExpirationTime(0);
             return Response.status(401).entity("Link expired").build();
         }
@@ -319,7 +319,7 @@ public class UserService {
         User user = userBean.getUser(username);
 
         //Verifica se o username existe na base de dados
-        if (user==null){
+        if (user == null) {
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             return response;
         }
@@ -330,7 +330,7 @@ public class UserService {
             userBean.updateUserEntityVisibility(username);
             response = Response.status(Response.Status.OK).entity(username + " visibility: " + !user.isVisible()).build(); //status code 200
 
-        }else {
+        } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -347,7 +347,7 @@ public class UserService {
         User user = userBean.getUser(username);
 
         //Verifica se o username existe na base de dados
-        if (user==null){
+        if (user == null) {
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             return response;
         }
@@ -359,9 +359,9 @@ public class UserService {
 
                 boolean updatedRole = userBean.updateUserEntityRole(username, typeOfUser);
                 response = Response.status(Response.Status.OK).entity("Role updated with success").build(); //status code 200
-            }else response = Response.status(401).entity("Invalid type of User").build();
+            } else response = Response.status(401).entity("Invalid type of User").build();
 
-        }else {
+        } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
 
@@ -394,7 +394,7 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@HeaderParam("token") String token) {
         Response response;
-        if (userBean.isAuthenticated(token) && !userBean.userIsDeveloper(token)) {
+        if (userBean.isAuthenticated(token)) {
             List<User> allUsers = userBean.getUsers();
             response = Response.status(200).entity(allUsers).build();
         } else {
@@ -437,7 +437,7 @@ public class UserService {
     public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser, @PathParam("visible") boolean visible) {
         Response response;
         if (userBean.isAuthenticated(token) && !userBean.userIsDeveloper(token)) {
-            List<User> users = userBean.getUsersByTypeAndVisibility(typeOfUser,visible);
+            List<User> users = userBean.getUsersByTypeAndVisibility(typeOfUser, visible);
             response = Response.status(200).entity(users).build();
         } else {
             response = Response.status(401).entity("You don't have permission").build();
@@ -448,34 +448,21 @@ public class UserService {
     @GET
     @Path("/{username}")
     @Produces(MediaType.APPLICATION_JSON)
-        public Response getUser(@PathParam("username") String username, @HeaderParam("token") String token) {
+    public Response getUser(@PathParam("username") String username, @HeaderParam("token") String token) {
         Response response;
 
         User userSearched = userBean.getUser(username);
 
         //Verifica se o username existe na base de dados
-        if (userSearched==null){
+        if (userSearched == null) {
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             return response;
         }
-
-        //Verifica se o token é igual ao username pesquisado
-        if (userBean.thisTokenIsFromThisUsername(token,username)) {
-
+        //Verifica se token existe de quem consulta
+        if (userBean.isAuthenticated(token)) {
             response = Response.ok().entity(userSearched).build();
-
-        }else {
-            //Verifica se token existe de quem consulta
-            if (userBean.isAuthenticated(token)) {
-                if (userBean.userIsScrumMaster(token) || userBean.userIsProductOwner(token)) {
-
-                    response = Response.ok().entity(userSearched).build();
-                } else {
-                    response = Response.status(Response.Status.BAD_REQUEST).entity("Invalid username on path").build();
-                }
-            } else {
-                response = Response.status(401).entity("Invalid credentials").build();
-            }
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
     }
@@ -504,7 +491,7 @@ public class UserService {
         Response response;
 
         if (userBean.isAuthenticated(token)) {
-            if (userBean.thisTokenIsFromThisUsername(token, username) || userBean.userIsProductOwner(token) || userBean.userIsScrumMaster(token)){
+            if (userBean.thisTokenIsFromThisUsername(token, username) || userBean.userIsProductOwner(token) || userBean.userIsScrumMaster(token)) {
                 ArrayList<Task> userTasks = taskBean.getAllTasksFromUser(username, token);
                 response = Response.status(Response.Status.OK).entity(userTasks).build();
             } else {
@@ -716,23 +703,23 @@ public class UserService {
         Response response;
 
         if (userBean.isAuthenticated(token)) {
-                if (userBean.userIsProductOwner(token)) {
-                    if (categoryBean.categoryExists(category.getName())) {
-                        response = Response.status(409).entity("Category with this name already exists").build();
-                    } else {
-                        try {
-                            boolean added = categoryBean.newCategory(category.getName());
-                            if (added) {
-                                response = Response.status(201).entity("Category created successfully").build();
-                            } else {
-                                response = Response.status(404).entity("Impossible to create category. Verify all fields").build();
-                            }
-                        } catch (Exception e) {
-                            response = Response.status(404).entity("Something went wrong. A new category was not created.").build();
-                        }
-                    }
+            if (userBean.userIsProductOwner(token)) {
+                if (categoryBean.categoryExists(category.getName())) {
+                    response = Response.status(409).entity("Category with this name already exists").build();
                 } else {
-                    response = Response.status(403).entity("You don't have permission to create a category").build();
+                    try {
+                        boolean added = categoryBean.newCategory(category.getName());
+                        if (added) {
+                            response = Response.status(201).entity("Category created successfully").build();
+                        } else {
+                            response = Response.status(404).entity("Impossible to create category. Verify all fields").build();
+                        }
+                    } catch (Exception e) {
+                        response = Response.status(404).entity("Something went wrong. A new category was not created.").build();
+                    }
+                }
+            } else {
+                response = Response.status(403).entity("You don't have permission to create a category").build();
             }
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
@@ -748,7 +735,7 @@ public class UserService {
         Response response;
 
         if (userBean.isAuthenticated(token)) {
-                if (userBean.userIsProductOwner(token)) {
+            if (userBean.userIsProductOwner(token)) {
                 try {
                     boolean deleted = categoryBean.deleteCategory(categoryName);
                     if (deleted) {
@@ -759,9 +746,9 @@ public class UserService {
                 } catch (Exception e) {
                     response = Response.status(404).entity("Something went wrong. The category was not removed.").build();
                 }
-                } else {
-                    response = Response.status(403).entity("You don't have permission to delete a category").build();
-                }
+            } else {
+                response = Response.status(403).entity("You don't have permission to delete a category").build();
+            }
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
@@ -776,22 +763,22 @@ public class UserService {
         Response response;
 
         if (userBean.isAuthenticated(token)) {
-                if (userBean.userIsProductOwner(token)) {
-                    try {
-                        System.out.println("########################## TRY " + categoryName + " " + newCategoryName);
-                        boolean edited = categoryBean.editCategory(categoryName, newCategoryName);
-                        System.out.println("************************** EDITED ENDPOINT " + edited + " *********************************");
-                        if (edited) {
-                            response = Response.status(200).entity("Category edited successfully").build();
-                        } else {
-                            response = Response.status(404).entity("Category with this name is not found").build();
-                        }
-                    } catch (Exception e) {
-                        response = Response.status(404).entity("Something went wrong. The category was not edited.").build();
+            if (userBean.userIsProductOwner(token)) {
+                try {
+                    System.out.println("########################## TRY " + categoryName + " " + newCategoryName);
+                    boolean edited = categoryBean.editCategory(categoryName, newCategoryName);
+                    System.out.println("************************** EDITED ENDPOINT " + edited + " *********************************");
+                    if (edited) {
+                        response = Response.status(200).entity("Category edited successfully").build();
+                    } else {
+                        response = Response.status(404).entity("Category with this name is not found").build();
                     }
-                } else {
-                    response = Response.status(403).entity("You don't have permission to edit a category").build();
+                } catch (Exception e) {
+                    response = Response.status(404).entity("Something went wrong. The category was not edited.").build();
                 }
+            } else {
+                response = Response.status(403).entity("You don't have permission to edit a category").build();
+            }
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
@@ -807,8 +794,8 @@ public class UserService {
 
         if (userBean.isAuthenticated(token)) {
             try {
-                    List<Category> allCategories = categoryBean.findAllCategories();
-                    response = Response.status(200).entity(allCategories).build();
+                List<Category> allCategories = categoryBean.findAllCategories();
+                response = Response.status(200).entity(allCategories).build();
             } catch (Exception e) {
                 response = Response.status(404).entity("Something went wrong. The categories were not found.").build();
             }
@@ -880,7 +867,6 @@ public class UserService {
         }
         return response;
     }
-
 
 
 }

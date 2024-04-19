@@ -30,28 +30,16 @@ public class ChatBean {
     private UserDao userDao;
 
 
-    public void sendMessage(String senderUsername, String receiverUsername, String messageContent) {
-        UserEntity sender = getUserByUsername(senderUsername);
-        UserEntity receiver = getUserByUsername(receiverUsername);
+    public ChatMessage convertChatMessageEntityToDTO(ChatMessageEntity entity) {
+        ChatMessage message = new ChatMessage();
+        message.setId(entity.getId());
+        message.setSenderUsername(entity.getSender().getUsername());
+        message.setReceiverUsername(entity.getReceiver().getUsername());
+        message.setMessage(entity.getMessage());
+        message.setSentAt(entity.getSentAt());
+        message.setRead(entity.isRead());
 
-        if (sender != null && receiver != null) {
-            LocalDateTime sentAt = LocalDateTime.now();
-            boolean isRead = false;
-
-            ChatMessageEntity messageEntity = new ChatMessageEntity(sender, receiver, messageContent, sentAt, isRead);
-            messageDao.create(messageEntity);
-
-            if (receiver.getToken() != null) {
-                messageEntity.setRead(true);
-                messageDao.update(messageEntity);
-                System.out.println("Message sent to user with username: " + receiver.getUsername());
-            } else {
-                sendNotification(receiver, "New message from " + sender.getUsername(), sentAt);
-                System.out.println("Notification sent to user with username: " + receiver.getUsername());
-            }
-        } else {
-            System.out.println("Error sending message: sender or receiver not found");
-        }
+        return message;
     }
 
     public String extractMessageText(String message) {
@@ -82,6 +70,10 @@ public class ChatBean {
         }
     }
 
+    public ChatMessage findLatestChatMessage(String senderUsername, String receiverUsername) {
+        return convertChatMessageEntityToDTO(messageDao.findLatestChatMessage(senderUsername, receiverUsername));
+    }
+
 
     public ArrayList<ChatMessage> getAllChatMessagesBetweenUsers(String senderUsername, String receiverUsername) {
         ArrayList<ChatMessageEntity> messageEntities = messageDao.findAllChatMessagesBetweenUsers(senderUsername, receiverUsername);
@@ -99,7 +91,7 @@ public class ChatBean {
         ArrayList<ChatNotification> notifications = new ArrayList<>();
 
         for (ChatNotificationEntity entity : notificationEntities) {
-            notifications.add(chatNotificationEntityToDTO(entity));
+            notifications.add(convertChatNotificationEntityToDTO(entity));
         }
 
         return notifications;
@@ -144,7 +136,7 @@ public class ChatBean {
         }
     }
 
-    private ChatNotification chatNotificationEntityToDTO(ChatNotificationEntity entity) {
+    private ChatNotification convertChatNotificationEntityToDTO(ChatNotificationEntity entity) {
         if (entity != null) {
             return new ChatNotification(entity.getId(), entity.getSender().getUsername(), entity.getReceiver().getUsername(),
                     entity.getMessage(), entity.getSentAt(), entity.isRead());
@@ -170,5 +162,15 @@ public class ChatBean {
         } else {
             System.out.println("Erro ao enviar notificação: receptor não encontrado");
         }
+    }
+
+    public String convertChatMessageToJSON(ChatMessage chatMessage) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("senderUsername", chatMessage.getSenderUsername());
+        jsonObject.addProperty("receiverUsername", chatMessage.getReceiverUsername());
+        jsonObject.addProperty("message", chatMessage.getMessage());
+        jsonObject.addProperty("sentAt", chatMessage.getSentAt().toString());
+
+        return jsonObject.toString();
     }
 }

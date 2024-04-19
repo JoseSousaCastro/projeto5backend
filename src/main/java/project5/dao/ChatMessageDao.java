@@ -82,7 +82,7 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
     }
 
 
-    private ChatMessageEntity findLatestChatMessage(String senderUsername, String receiverUsername) {
+    public ChatMessageEntity findLatestChatMessage(String senderUsername, String receiverUsername) {
         try {
             return (ChatMessageEntity) em.createNamedQuery("ChatMessage.findLatestChatMessage")
                     .setParameter("sender", senderUsername)
