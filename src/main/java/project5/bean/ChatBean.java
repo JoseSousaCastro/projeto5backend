@@ -1,5 +1,7 @@
 package project5.bean;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import project5.dao.ChatMessageDao;
@@ -10,8 +12,10 @@ import project5.dto.ChatNotification;
 import project5.entity.ChatMessageEntity;
 import project5.entity.ChatNotificationEntity;
 import project5.entity.UserEntity;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+
 
 @Stateless
 public class ChatBean {
@@ -25,6 +29,7 @@ public class ChatBean {
     @Inject
     private UserDao userDao;
 
+
     public void sendMessage(String senderUsername, String receiverUsername, String messageContent) {
         UserEntity sender = getUserByUsername(senderUsername);
         UserEntity receiver = getUserByUsername(receiverUsername);
@@ -36,10 +41,47 @@ public class ChatBean {
             ChatMessageEntity messageEntity = new ChatMessageEntity(sender, receiver, messageContent, sentAt, isRead);
             messageDao.create(messageEntity);
 
-            // Enviar notificação ao receptor
-            sendNotification(receiver, senderUsername + " enviou uma mensagem", sentAt);
+            if (receiver.getToken() != null) {
+                messageEntity.setRead(true);
+                messageDao.update(messageEntity);
+                System.out.println("Message sent to user with username: " + receiver.getUsername());
+            } else {
+                sendNotification(receiver, "New message from " + sender.getUsername(), sentAt);
+                System.out.println("Notification sent to user with username: " + receiver.getUsername());
+            }
+        } else {
+            System.out.println("Error sending message: sender or receiver not found");
         }
     }
+
+    public String extractMessageText(String message) {
+        // Extrai o texto da mensagem JSON
+        JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
+        String text = jsonObject.get("text").getAsString();
+        return text;
+    }
+
+    public void createAndSaveMessage(UserEntity sender, UserEntity receiver, String messageText) {
+        if (sender != null && receiver != null) {
+            LocalDateTime sentAt = LocalDateTime.now();
+            boolean isRead = false;
+
+            ChatMessageEntity newMessage = new ChatMessageEntity(sender, receiver, messageText, sentAt, isRead);
+            System.out.println("Saving message: " + newMessage);
+            saveMessage(newMessage);
+        } else {
+            System.out.println("Sender or receiver not found. Unable to save message.");
+        }
+    }
+
+    public void saveMessage(ChatMessageEntity message) {
+        if (message != null) {
+            messageDao.create(message);
+        } else {
+            System.out.println("Error: message is null");
+        }
+    }
+
 
     public ArrayList<ChatMessage> getAllChatMessagesBetweenUsers(String senderUsername, String receiverUsername) {
         ArrayList<ChatMessageEntity> messageEntities = messageDao.findAllChatMessagesBetweenUsers(senderUsername, receiverUsername);
@@ -92,7 +134,7 @@ public class ChatBean {
         }
     }
 
-    private ChatMessageEntity chatMessageDTOToEntity(ChatMessage message) {
+    private ChatMessageEntity chatMessageDTOToEntity(ChatMessageEntity message) {
         if (message != null) {
             UserEntity sender = getUserByUsername(message.getSenderUsername());
             UserEntity receiver = getUserByUsername(message.getReceiverUsername());

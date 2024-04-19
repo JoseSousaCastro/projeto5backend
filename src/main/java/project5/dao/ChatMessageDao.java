@@ -16,7 +16,7 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
         super(ChatMessageEntity.class);
     }
 
-    public ChatMessageEntity findChatMessageById(String id) {
+    public ChatMessageEntity findChatMessageById(Long id) {
         try {
             return em.createNamedQuery("ChatMessage.findChatMessageById", ChatMessageEntity.class)
                     .setParameter("id", id)
@@ -94,8 +94,17 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
     }
 
     public void create(ChatMessageEntity messageEntity) {
+        System.out.println("messageEntity" + messageEntity);
         if (messageEntity != null) {
             em.persist(messageEntity);
+        } else {
+            System.out.println("Error: messageEntity is null");
+        }
+    }
+
+    public void update(ChatMessageEntity messageEntity) {
+        if (messageEntity != null) {
+            em.merge(messageEntity);
         } else {
             System.out.println("Error: messageEntity is null");
         }

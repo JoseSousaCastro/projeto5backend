@@ -44,6 +44,9 @@ public class ChatMessageEntity implements Serializable {
     @Column(name = "is_read")
     private boolean isRead;
 
+    @Column
+    private boolean delivered;
+
 
     public ChatMessageEntity() {
     }
@@ -54,6 +57,14 @@ public class ChatMessageEntity implements Serializable {
         this.message = message;
         this.sentAt = sentAt;
         this.isRead = isRead;
+    }
+
+    public ChatMessageEntity(UserEntity sender, UserEntity receiver, String message, LocalDateTime sentAt) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.message = message;
+        this.sentAt = sentAt;
+        this.isRead = false;
     }
 
     public Long getId() {
@@ -105,6 +116,21 @@ public class ChatMessageEntity implements Serializable {
         isRead = read;
     }
 
+    public boolean isDelivered() {
+        return delivered;
+    }
+
+    public void setDelivered(boolean delivered) {
+        this.delivered = delivered;
+    }
+
+    public String getSenderUsername() {
+        return sender.getUsername();
+    }
+
+    public String getReceiverUsername() {
+        return receiver.getUsername();
+    }
 }
 
 
