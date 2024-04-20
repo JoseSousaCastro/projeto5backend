@@ -1,11 +1,14 @@
 package project5.service;
 
 import project5.bean.*;
+import project5.dao.UserDao;
 import project5.dto.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import project5.entity.ChatMessageEntity;
+import project5.entity.UserEntity;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,6 +27,10 @@ public class UserService {
     EmailBean emailBean;
     @Inject
     StatsBean statsBean;
+    @Inject
+    UserDao userDao;
+    @Inject
+    ChatBean chatBean;
 
 
     @POST
@@ -868,5 +875,19 @@ public class UserService {
         return response;
     }
 
-
+    @GET
+    @Path("/getAllMessagesBetweenUsers/{usernameReceiver}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllMessagesBetweenUsers(@HeaderParam("token") String token, @PathParam("usernameReceiver") String usernameReceiver) {
+        Response response;
+        if (userBean.isAuthenticated(token)) {
+            UserEntity userSender = userDao.findUserByToken(token);
+            String usernameSender = userSender.getUsername();
+            ArrayList<ChatMessage> messages = chatBean.getAllChatMessagesBetweenUsers(usernameSender, usernameReceiver);
+            response = Response.status(200).entity(messages).build();
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
 }
