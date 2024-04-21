@@ -105,6 +105,7 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity> {
 
     public void update(ChatNotificationEntity notification) {
         if (notification != null) {
+            notification.setRead(true);
             em.merge(notification);
         } else {
             System.out.println("Error: ChatNotificationEntity is null");
@@ -116,6 +117,17 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity> {
             em.persist(notificationEntity);
         } else {
             System.out.println("Error: ChatNotificationEntity is null");
+        }
+    }
+
+    public ChatNotificationEntity findLatestChatNotification(String senderUsername, String receiverUsername) {
+        try {
+            return (ChatNotificationEntity) em.createNamedQuery("ChatNotification.findLatestChatNotification")
+                    .setParameter("sender", senderUsername)
+                    .setParameter("receiver", receiverUsername)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
         }
     }
 }

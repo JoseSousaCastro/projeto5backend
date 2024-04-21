@@ -21,6 +21,9 @@ import java.time.LocalDateTime;
 @NamedQuery(name = "ChatNotification.dontShowChatNotification", query = "UPDATE ChatNotificationEntity c SET c.isRead = true " +
         "WHERE c.sender.username = :sender AND c.receiver.username = :receiver AND c.isRead = false")
 @NamedQuery(name = "ChatNotification.findAllChatNotificationsByReceiver", query = "SELECT c FROM ChatNotificationEntity c WHERE c.receiver.username = :receiver")
+@NamedQuery(name = "ChatNotification.findLatestChatNotification", query = "SELECT c FROM ChatNotificationEntity c WHERE (c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver) AND c.sentAt = (SELECT MAX(c.sentAt) FROM ChatNotificationEntity c WHERE (c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver))")
 public class ChatNotificationEntity implements Serializable{
 
     private static final long serialVersionUID = 1L;

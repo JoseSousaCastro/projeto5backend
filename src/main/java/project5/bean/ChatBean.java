@@ -15,6 +15,9 @@ import project5.entity.UserEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Stateless
@@ -49,6 +52,13 @@ public class ChatBean {
         return text;
     }
 
+    public String extractNotificationText(String notification) {
+        // Extrai o texto da notificação JSON
+        JsonObject jsonObject = JsonParser.parseString(notification).getAsJsonObject();
+        String text = jsonObject.get("text").getAsString();
+        return text;
+    }
+
     public void createAndSaveMessage(UserEntity sender, UserEntity receiver, String messageText) {
         if (sender != null && receiver != null) {
             LocalDateTime sentAt = LocalDateTime.now();
@@ -56,22 +66,31 @@ public class ChatBean {
 
             ChatMessageEntity newMessage = new ChatMessageEntity(sender, receiver, messageText, sentAt, isRead);
             System.out.println("Saving message: " + newMessage);
-            saveMessage(newMessage);
+            messageDao.create(newMessage);
         } else {
             System.out.println("Sender or receiver not found. Unable to save message.");
         }
     }
 
-    public void saveMessage(ChatMessageEntity message) {
-        if (message != null) {
-            messageDao.create(message);
+    public void createAndSaveNotification(UserEntity sender, UserEntity receiver, String messageText) {
+        if (sender != null && receiver != null) {
+            LocalDateTime sentAt = LocalDateTime.now();
+            boolean isRead = false;
+
+            ChatNotificationEntity newNotification = new ChatNotificationEntity(sender, receiver, messageText, sentAt, isRead);
+            System.out.println("Saving notification: " + newNotification);
+            notificationDao.create(newNotification);
         } else {
-            System.out.println("Error: message is null");
+            System.out.println("Sender or receiver not found. Unable to save notification.");
         }
     }
 
     public ChatMessage findLatestChatMessage(String senderUsername, String receiverUsername) {
         return convertChatMessageEntityToDTO(messageDao.findLatestChatMessage(senderUsername, receiverUsername));
+    }
+
+    public ChatNotification findLatestChatNotification(String senderUsername, String receiverUsername) {
+        return convertChatNotificationEntityToDTO(notificationDao.findLatestChatNotification(senderUsername, receiverUsername));
     }
 
 
@@ -96,6 +115,31 @@ public class ChatBean {
 
         return notifications;
     }
+
+    public Map<String, Integer> countUnreadNotificationsBySender(ArrayList<ChatNotification> notifications) {
+        Map<String, Integer> unreadNotificationCounts = new HashMap<>();
+
+        // Itera sobre todas as notificações
+        for (ChatNotification notification : notifications) {
+            // Verifica se a notificação não foi lida
+            if (!notification.isRead()) {
+                // Obtém o nome do remetente
+                String senderUsername = notification.getSenderUsername();
+
+                // Verifica se o remetente já tem um contador no mapa
+                if (!unreadNotificationCounts.containsKey(senderUsername)) {
+                    // Se não houver, inicia o contador em 1
+                    unreadNotificationCounts.put(senderUsername, 1);
+                } else {
+                    // Se já houver, incrementa o contador existente
+                    unreadNotificationCounts.put(senderUsername, unreadNotificationCounts.get(senderUsername) + 1);
+                }
+            }
+        }
+        // Retorna o mapa com o número de notificações não lidas por remetente
+        return unreadNotificationCounts;
+    }
+
 
     public int countUnreadNotifications(String receiverUsername) {
         return notificationDao.countAllChatNotificationsNotRead(receiverUsername);
@@ -170,6 +214,16 @@ public class ChatBean {
         jsonObject.addProperty("receiverUsername", chatMessage.getReceiverUsername());
         jsonObject.addProperty("message", chatMessage.getMessage());
         jsonObject.addProperty("sentAt", chatMessage.getSentAt().toString());
+
+        return jsonObject.toString();
+    }
+
+    public String convertChatNotificationToJSON(ChatNotification chatNotification) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("senderUsername", chatNotification.getSenderUsername());
+        jsonObject.addProperty("receiverUsername", chatNotification.getReceiverUsername());
+        jsonObject.addProperty("message", chatNotification.getMessage());
+        jsonObject.addProperty("sentAt", chatNotification.getSentAt().toString());
 
         return jsonObject.toString();
     }
