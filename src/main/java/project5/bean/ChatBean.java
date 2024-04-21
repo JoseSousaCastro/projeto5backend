@@ -145,15 +145,22 @@ public class ChatBean {
         return notificationDao.countAllChatNotificationsNotRead(receiverUsername);
     }
 
-    public void markNotificationAsRead(String notificationId) {
-        ChatNotificationEntity notification = notificationDao.findChatNotificationById(notificationId);
-        if (notification != null && !notification.isRead()) {
-            notification.setRead(true);
-            notificationDao.update(notification);
+    public void markChatMessageAsRead(Long messageId) {
+        ChatMessageEntity message = messageDao.findChatMessageById(messageId);
+        if (message != null && !message.isRead()) {
+            message.setRead(true);
+            message.setDelivered(true);
+            messageDao.update(message);
         }
     }
-
-    // Métodos auxiliares para conversão de entidade para DTO e vice-versa, e outras operações relacionadas ao chat
+    public void markAllChatMessagesAsRead(String senderUsername) {
+        ArrayList<ChatMessageEntity> arrayMessages = messageDao.findAllUnreadChatMessages(senderUsername);
+        for (ChatMessageEntity message : arrayMessages) {
+            message.setRead(true);
+            message.setDelivered(true);
+            messageDao.update(message);
+        }
+    }
 
     private UserEntity getUserByUsername(String username) {
         if (username != null && !username.isEmpty())

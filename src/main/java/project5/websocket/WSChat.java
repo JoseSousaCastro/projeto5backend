@@ -50,6 +50,7 @@ public class WSChat {
         String conversationID = senderUsername + receiverUsername;
         System.out.println("Conversation ID: " + conversationID);
         sessions.put(conversationID, session);
+        chatBean.markAllChatMessagesAsRead(senderUsername);
     }
 
     @OnClose
@@ -83,7 +84,7 @@ public class WSChat {
                 String jsonMessage = chatBean.convertChatMessageToJSON(chatMessage);
                 try {
                     receiverSession.getBasicRemote().sendText(jsonMessage);
-                    chatMessage.setRead(true);
+                    chatBean.markChatMessageAsRead(chatMessage.getId());
                 } catch (IOException e) {
                     System.out.println("Something went wrong!");
                 }

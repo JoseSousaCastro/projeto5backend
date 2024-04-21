@@ -50,10 +50,10 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
     }
 
 
-    public ArrayList<ChatMessageEntity> findAllUnreadChatMessages(String receiverUsername) {
+    public ArrayList<ChatMessageEntity> findAllUnreadChatMessages(String senderUsername) {
         try {
             return new ArrayList<>(em.createNamedQuery("ChatMessage.findAllUnreadChatMessages", ChatMessageEntity.class)
-                    .setParameter("receiver", receiverUsername)
+                    .setParameter("receiver", senderUsername)
                     .getResultList());
         } catch (NoResultException e) {
             return new ArrayList<>();
@@ -67,7 +67,7 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
 
             if (latestMessage != null) {
                 // Marca todas as mensagens anteriores como lidas
-                em.createQuery("UPDATE ChatMessageEntity c SET c.isRead = true " +
+                em.createQuery("UPDATE ChatMessageEntity c SET c.isRead = true, c.delivered = true " +
                                 "WHERE c.sender = :senderUsername " +
                                 "AND c.receiver = :receiverUsername " +
                                 "AND c.sentAt < :latestSentAt")
