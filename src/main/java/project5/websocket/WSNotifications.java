@@ -53,20 +53,6 @@ public class WSNotifications {
         System.out.println("Session added to sessions map: " + session);
         System.out.println("Sessions map: " + sessions);
         System.out.println("Session get usernameId: " + sessions.get(usernameId));
-
-        // Obtém o mapa de contagem de notificações não lidas por remetente
-        Map<String, Integer> unreadNotificationCounts = chatBean.countUnreadNotificationsBySender(chatBean.getAllNotificationsByReceiver(usernameId));
-
-        // Converte o mapa em uma representação JSON
-        Gson gson = new Gson();
-        String jsonNotificationCounts = gson.toJson(unreadNotificationCounts);
-
-        // Envia a representação JSON para o cliente através do WebSocket
-        try {
-            session.getBasicRemote().sendText(jsonNotificationCounts);
-        } catch (IOException e) {
-            System.out.println("Error sending notification counts to client: " + e.getMessage());
-        }
     }
 
     @OnClose
