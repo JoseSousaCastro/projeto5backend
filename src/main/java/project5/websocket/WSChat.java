@@ -93,10 +93,15 @@ public class WSChat {
                 System.out.println("Receiver message session not found. Message saved and notification created");
                 if (receiver.getToken() != null) {
                     // enviar para o frontend através do notifiernotifications
+                    System.out.println("Receiver is online. A notification will be generated");
                     ChatNotification chatNotification = chatBean.findLatestChatNotification(sender.getUsername(), receiver.getUsername());
+                    System.out.println("chatNotification: " + chatNotification);
+                    System.out.println("chatNotification.getSenderUsername(): " + chatNotification.getSenderUsername());
+                    System.out.println("chatNotification.getReceiverUsername(): " + chatNotification.getReceiverUsername());
                     String jsonNotification = chatBean.convertChatNotificationToJSON(chatNotification);
-                    WSNotifications.send(receiver.getToken(), jsonNotification);
-                    System.out.println("Receiver is online. Notification sent");
+                    System.out.println("jsonNotification: " + jsonNotification);
+                    System.out.println("receiver username: " + receiver.getUsername());
+                    WSNotifications.send(receiver.getUsername(), jsonNotification);
                 } else {
                     System.out.println("Receiver session not found and receiver not online. Message and notification saved");
                 }

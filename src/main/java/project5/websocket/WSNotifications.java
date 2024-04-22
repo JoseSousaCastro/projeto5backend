@@ -27,12 +27,16 @@ public class WSNotifications {
     @EJB
     private UserDao userDao;
 
-    public void send(String token, String notification) {
-        Session session = sessions.get(token);
+    public void send(String username, String notification) {
+        Session session = sessions.get(username);
+        System.out.println("Username no WSNotifications : " + username);
+        System.out.println("Session no WSNotifications : " + session);
+        System.out.println("Notification no WSNotifications : " + notification);
         if (session != null) {
             System.out.println("sending.......... " + notification);
             try {
                 session.getBasicRemote().sendText(notification);
+                System.out.println("Notification sent!");
             } catch (IOException e) {
                 System.out.println("Something went wrong!");
             }
@@ -43,11 +47,15 @@ public class WSNotifications {
     public void toDoOnOpen(Session session, @PathParam("token") String token) {
         System.out.println("A new notifications WebSocket session is opened for client with token: " + token);
         UserEntity receiver = userDao.findUserByToken(token);
-        String receiverUsername = receiver.getUsername();
-        sessions.put(receiverUsername, session);
+        String usernameId = receiver.getUsername();
+        System.out.println("usernameId: " + usernameId);
+        sessions.put(usernameId, session);
+        System.out.println("Session added to sessions map: " + session);
+        System.out.println("Sessions map: " + sessions);
+        System.out.println("Session get usernameId: " + sessions.get(usernameId));
 
         // Obtém o mapa de contagem de notificações não lidas por remetente
-        Map<String, Integer> unreadNotificationCounts = chatBean.countUnreadNotificationsBySender(chatBean.getAllNotificationsByReceiver(receiverUsername));
+        Map<String, Integer> unreadNotificationCounts = chatBean.countUnreadNotificationsBySender(chatBean.getAllNotificationsByReceiver(usernameId));
 
         // Converte o mapa em uma representação JSON
         Gson gson = new Gson();
