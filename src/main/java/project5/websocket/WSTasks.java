@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 @Singleton
-@ServerEndpoint("/websocket/notifications/{token}")
+@ServerEndpoint("/websocket/tasks/{token}")
 public class WSTasks {
 
     HashMap<String, Session> sessions = new HashMap<String, Session>();

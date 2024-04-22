@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 @Singleton
-@ServerEndpoint("/websocket/notifications/{token}")
+@ServerEndpoint("/websocket/dashboard/{token}")
 public class WSDashboard {
 
     HashMap<String, Session> sessions = new HashMap<String, Session>();
@@ -25,17 +25,19 @@ public class WSDashboard {
     @EJB
     private UserDao userDao;
 
-    public void send(String token, String msg) {
-        Session session = sessions.get(token);
-        if (session != null) {
-            System.out.println("sending.......... " + msg);
-            try {
-                session.getBasicRemote().sendText(msg);
-            } catch (IOException e) {
-                System.out.println("Something went wrong!");
+    public void send(String msg) {
+        for (Session session : sessions.values()) {
+            if (session.isOpen()) {
+                System.out.println("Sending message: " + msg);
+                try {
+                    session.getBasicRemote().sendText(msg);
+                } catch (IOException e) {
+                    System.out.println("Error sending message to session: " + e.getMessage());
+                }
             }
         }
     }
+
 
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token) {
