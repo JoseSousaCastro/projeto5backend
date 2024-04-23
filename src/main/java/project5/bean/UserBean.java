@@ -33,7 +33,7 @@ public class UserBean implements Serializable {
     @EJB
     private CategoryBean categoryBean;
     @EJB
-    private WSDashboard dashboard;
+    private WSDashboard wsDashboard;
 
 
     //Construtor vazio
@@ -132,7 +132,7 @@ public class UserBean implements Serializable {
 
                 //Persist o user
                 userDao.persist(convertUserDtotoUserEntity(user));
-                dashboard.send("change");
+                wsDashboard.send("stats have been changed");
                 return true;
             }
         } else {
@@ -158,7 +158,7 @@ public class UserBean implements Serializable {
                 taskDao.merge(t);
             }
             userDao.remove(u);
-            dashboard.send("change");
+            wsDashboard.send("stats have been changed");
             return true;
         } else
             return false;
@@ -394,7 +394,7 @@ public class UserBean implements Serializable {
 
             try {
                 userDao.merge(u); //Atualiza o user na base de dados
-                dashboard.send("change");
+                wsDashboard.send("stats have been changed");
                 status = true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -413,7 +413,7 @@ public class UserBean implements Serializable {
         if (u != null) {
 
             u.setVisible(!u.isVisible());
-            dashboard.send("change");
+            wsDashboard.send("stats have been changed");
 
             status = true;
         }
@@ -429,7 +429,7 @@ public class UserBean implements Serializable {
         if (u != null && u.getTypeOfUser() != typeOfUser) {
 
             u.setTypeOfUser(typeOfUser);
-            dashboard.send("change");
+            wsDashboard.send("stats have been changed");
 
             status = true;
         }

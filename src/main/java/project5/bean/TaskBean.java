@@ -13,6 +13,7 @@ import project5.entity.UserEntity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import project5.websocket.WSDashboard;
+import project5.websocket.WSTasks;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -34,7 +35,9 @@ public class TaskBean implements Serializable {
     @EJB
     private TaskBean taskBean;
     @EJB
-    private WSDashboard dashboard;
+    private WSDashboard wsDashboard;
+    @EJB
+    private WSTasks wsTasks;
 
     private static final Logger logger = LogManager.getLogger(TaskBean.class);
 
@@ -54,9 +57,9 @@ public class TaskBean implements Serializable {
         if (validateTask(task)) {
             taskDao.persist(convertTaskToEntity(task));
             created = true;
-
         }
-        dashboard.send("change");
+        wsDashboard.send("stats have been changed");
+        wsTasks.send("tasks have been changed");
         return created;
     }
 
@@ -111,7 +114,8 @@ public class TaskBean implements Serializable {
                 edited = true;
             }
         }
-        dashboard.send("change");
+        wsDashboard.send("stats have been changed");
+        wsTasks.send("tasks have been changed");
         return edited;
     }
 
@@ -133,7 +137,8 @@ public class TaskBean implements Serializable {
                 updated = true;
             }
         }
-        dashboard.send("change");
+        wsDashboard.send("stats have been changed");
+        wsTasks.send("tasks have been changed");
         return updated;
     }
 
@@ -147,7 +152,8 @@ public class TaskBean implements Serializable {
             taskDao.merge(taskEntity);
             swithedErased = true;
         }
-        dashboard.send("change");
+        wsDashboard.send("stats have been changed");
+        wsTasks.send("tasks have been changed");
         return swithedErased;
     }
 
@@ -161,7 +167,8 @@ public class TaskBean implements Serializable {
             taskDao.deleteTask(id);
             removed = true;
         }
-        dashboard.send("change");
+        wsDashboard.send("stats have been changed");
+        wsTasks.send("tasks have been changed");
         return removed;
     }
 
@@ -219,7 +226,8 @@ public class TaskBean implements Serializable {
                 erased = true;
             }
         }
-        dashboard.send("change");
+        wsDashboard.send("stats have been changed");
+        wsTasks.send("tasks have been changed");
         return erased;
     }
 
@@ -236,6 +244,7 @@ public class TaskBean implements Serializable {
         taskEntity.setCategory(categoryDao.findCategoryByName(task.getCategory().getName()));
         taskEntity.setErased(task.getErased());
         taskEntity.setOwner(userBean.convertUserDtotoUserEntity(task.getOwner()));
+        taskEntity.setDoneDate(task.getDoneDate());
         return taskEntity;
     }
 
@@ -251,6 +260,7 @@ public class TaskBean implements Serializable {
         task.setCategory(categoryBean.convertCategoryEntityToCategoryDto(taskEntity.getCategory()));
         task.setErased(taskEntity.getErased());
         task.setOwner(userBean.convertUserEntitytoUserDto(taskEntity.getOwner()));
+        task.setDoneDate(taskEntity.getDoneDate());
         return task;
     }
 }

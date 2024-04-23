@@ -15,7 +15,7 @@ public class CategoryBean implements Serializable {
     @EJB
     private CategoryDao categoryDao;
     @EJB
-    private WSDashboard dashboard;
+    private WSDashboard wsDashboard;
 
     public boolean newCategory(String name) {
         boolean created = false;
@@ -24,7 +24,7 @@ public class CategoryBean implements Serializable {
             categoryEntity.setName(name);
             categoryDao.persist(categoryEntity);
             created = true;
-            dashboard.send("change");
+            wsDashboard.send("stats have been changed");
         }
         return created;
     }
@@ -55,7 +55,7 @@ public class CategoryBean implements Serializable {
         if (name != null) {
             deleted = categoryDao.deleteCategory(name);
         }
-        dashboard.send("change");
+        wsDashboard.send("stats have been changed");
         return deleted;
     }
 
@@ -64,7 +64,7 @@ public class CategoryBean implements Serializable {
         if (name != null && newName != null) {
             edited = categoryDao.editCategory(name, newName);
         }
-        dashboard.send("change");
+        wsDashboard.send("stats have been changed");
         return edited;
     }
 

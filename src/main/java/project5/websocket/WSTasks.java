@@ -25,14 +25,15 @@ public class WSTasks {
     @EJB
     private UserDao userDao;
 
-    public void send(String token, String msg) {
-        Session session = sessions.get(token);
-        if (session != null) {
-            System.out.println("sending.......... " + msg);
-            try {
-                session.getBasicRemote().sendText(msg);
-            } catch (IOException e) {
-                System.out.println("Something went wrong!");
+    public void send(String msg) {
+        for (Session session : sessions.values()) {
+            if (session.isOpen()) {
+                System.out.println("Sending message: " + msg);
+                try {
+                    session.getBasicRemote().sendText(msg);
+                } catch (IOException e) {
+                    System.out.println("Error sending message to session: " + e.getMessage());
+                }
             }
         }
     }
