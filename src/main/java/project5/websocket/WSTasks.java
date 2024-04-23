@@ -1,6 +1,5 @@
 package project5.websocket;
 
-import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
 import jakarta.inject.Inject;
@@ -13,11 +12,10 @@ import project5.entity.UserEntity;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 @Singleton
-@ServerEndpoint("/websocket/notifications/{token}")
-public class WSNotifications {
+@ServerEndpoint("/websocket/tasks/{token}")
+public class WSTasks {
 
     HashMap<String, Session> sessions = new HashMap<String, Session>();
 
@@ -27,16 +25,12 @@ public class WSNotifications {
     @EJB
     private UserDao userDao;
 
-    public void send(String username, String notification) {
-        Session session = sessions.get(username);
-        System.out.println("Username no WSNotifications : " + username);
-        System.out.println("Session no WSNotifications : " + session);
-        System.out.println("Notification no WSNotifications : " + notification);
+    public void send(String token, String msg) {
+        Session session = sessions.get(token);
         if (session != null) {
-            System.out.println("sending.......... " + notification);
+            System.out.println("sending.......... " + msg);
             try {
-                session.getBasicRemote().sendText(notification);
-                System.out.println("Notification sent!");
+                session.getBasicRemote().sendText(msg);
             } catch (IOException e) {
                 System.out.println("Something went wrong!");
             }

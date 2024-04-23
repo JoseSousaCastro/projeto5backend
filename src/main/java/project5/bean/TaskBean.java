@@ -12,6 +12,8 @@ import project5.entity.TaskEntity;
 import project5.entity.UserEntity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import project5.websocket.WSDashboard;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -31,6 +33,8 @@ public class TaskBean implements Serializable {
     private CategoryBean categoryBean;
     @EJB
     private TaskBean taskBean;
+    @EJB
+    private WSDashboard dashboard;
 
     private static final Logger logger = LogManager.getLogger(TaskBean.class);
 
@@ -52,7 +56,7 @@ public class TaskBean implements Serializable {
             created = true;
 
         }
-
+        dashboard.send("change");
         return created;
     }
 
@@ -107,7 +111,7 @@ public class TaskBean implements Serializable {
                 edited = true;
             }
         }
-
+        dashboard.send("change");
         return edited;
     }
 
@@ -129,6 +133,7 @@ public class TaskBean implements Serializable {
                 updated = true;
             }
         }
+        dashboard.send("change");
         return updated;
     }
 
@@ -142,6 +147,7 @@ public class TaskBean implements Serializable {
             taskDao.merge(taskEntity);
             swithedErased = true;
         }
+        dashboard.send("change");
         return swithedErased;
     }
 
@@ -155,6 +161,7 @@ public class TaskBean implements Serializable {
             taskDao.deleteTask(id);
             removed = true;
         }
+        dashboard.send("change");
         return removed;
     }
 
@@ -212,6 +219,7 @@ public class TaskBean implements Serializable {
                 erased = true;
             }
         }
+        dashboard.send("change");
         return erased;
     }
 
@@ -245,7 +253,4 @@ public class TaskBean implements Serializable {
         task.setOwner(userBean.convertUserEntitytoUserDto(taskEntity.getOwner()));
         return task;
     }
-
-
-
 }

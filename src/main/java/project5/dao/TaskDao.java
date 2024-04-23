@@ -37,6 +37,15 @@ public class TaskDao extends AbstractDao<TaskEntity> {
         }
     }
 
+    public ArrayList<TaskEntity> findTasksNotDeletedNorErasedByUser(UserEntity userEntity) {
+        try {
+            return (ArrayList<TaskEntity>) em.createNamedQuery("Task.findTasksNotDeletedNorErasedByUser").setParameter("owner", userEntity).getResultList();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
     public ArrayList<TaskEntity> findErasedTasks() {
         try {
             return (ArrayList<TaskEntity>) em.createNamedQuery("Task.findErasedTasks").getResultList();
@@ -86,9 +95,9 @@ public class TaskDao extends AbstractDao<TaskEntity> {
         return deleted;
     }
 
-    public ArrayList<TaskEntity> findTasksByUserAndStateId(UserEntity userEntity, int stateId) {
+    public ArrayList<TaskEntity> findTasksNotDeletedeNorErsasedByUserAndStateId(UserEntity userEntity, int stateId) {
         try {
-            return (ArrayList<TaskEntity>) em.createNamedQuery("Task.findTasksByUserAndStateId").setParameter("owner", userEntity).setParameter("stateId", stateId).getResultList();
+            return (ArrayList<TaskEntity>) em.createNamedQuery("Task.findTasksNotDeletedeNorErsasedByUserAndStateId").setParameter("owner", userEntity).setParameter("stateId", stateId).getResultList();
         } catch (Exception e) {
             return null;
         }
