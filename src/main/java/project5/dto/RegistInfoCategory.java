@@ -19,6 +19,11 @@ public class RegistInfoCategory {
         this.quantity = 1;
     }
 
+    public RegistInfoCategory(String categoryName, int taskCount) {
+        this.category = categoryName;
+        this.quantity = taskCount;
+    }
+
     public String getCategory() {
         return category;
     }

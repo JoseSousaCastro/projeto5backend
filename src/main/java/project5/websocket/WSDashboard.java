@@ -41,7 +41,7 @@ public class WSDashboard {
 
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token) {
-        System.out.println("A new notifications WebSocket session is opened for client with token: " + token);
+        System.out.println("A new dashboard WebSocket session is opened for client with token: " + token);
         UserEntity receiver = userDao.findUserByToken(token);
         String usernameId = receiver.getUsername();
         System.out.println("usernameId: " + usernameId);
@@ -53,7 +53,7 @@ public class WSDashboard {
 
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {
-        System.out.println("Notifications Websocket session is closed with CloseCode: " +
+        System.out.println("Dashboard Websocket session is closed with CloseCode: " +
                 reason.getCloseCode() + ": " + reason.getReasonPhrase());
         for (String key : sessions.keySet()) {
             if (sessions.get(key) == session)

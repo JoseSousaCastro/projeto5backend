@@ -10,11 +10,13 @@ import jakarta.persistence.*;
 @Table(name="task")
 @NamedQuery(name="Task.findTaskById", query="SELECT a FROM TaskEntity a WHERE a.id = :id")// os : significam que, neste caso o id é um parametro/atributo
 @NamedQuery(name="Task.findTasksByUser", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name="Task.findTasksNotDeletedNorErasedByUser", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findTasksByCategory", query="SELECT a FROM TaskEntity a WHERE a.category = :category ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findErasedTasks", query="SELECT a FROM TaskEntity a WHERE a.erased = true ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findAllTasks", query="SELECT a FROM TaskEntity a ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="DeleteTask", query="DELETE FROM TaskEntity a WHERE a.id = :id")
 @NamedQuery(name="Task.findTasksByUserAndStateId", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name="Task.findTasksNotDeletedeNorErsasedByUserAndStateId", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.erased = false AND a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findAllTasksByStateId", query="SELECT a FROM TaskEntity a WHERE a.stateId = :stateId AND a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findAllTasksNotErased", query="SELECT a FROM TaskEntity a WHERE a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findAllCompletedTasks", query="SELECT a FROM TaskEntity a WHERE a.stateId = 300 AND a.erased = false ORDER BY a.doneDate DESC")
