@@ -5,6 +5,7 @@ import jakarta.ejb.Stateless;
 import project5.dao.CategoryDao;
 import project5.dto.Category;
 import project5.entity.CategoryEntity;
+import project5.websocket.WSDashboard;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,7 +13,9 @@ import java.util.ArrayList;
 @Stateless
 public class CategoryBean implements Serializable {
     @EJB
-    CategoryDao categoryDao;
+    private CategoryDao categoryDao;
+    @EJB
+    private WSDashboard dashboard;
 
     public boolean newCategory(String name) {
         boolean created = false;
@@ -21,8 +24,9 @@ public class CategoryBean implements Serializable {
             categoryEntity.setName(name);
             categoryDao.persist(categoryEntity);
             created = true;
+            dashboard.send("change");
         }
-        return created;  // FALTA FAZER VERIFICAÇÃO DAS PERMISSÕES DO UTILIZADOR PARA CRIAR CATEGORIA
+        return created;
     }
 
     public boolean categoryExists(String name) {
@@ -51,6 +55,7 @@ public class CategoryBean implements Serializable {
         if (name != null) {
             deleted = categoryDao.deleteCategory(name);
         }
+        dashboard.send("change");
         return deleted;
     }
 
@@ -59,7 +64,7 @@ public class CategoryBean implements Serializable {
         if (name != null && newName != null) {
             edited = categoryDao.editCategory(name, newName);
         }
-        System.out.println("########################## CategoryBean EDITED: " + edited);
+        dashboard.send("change");
         return edited;
     }
 
@@ -74,7 +79,5 @@ public class CategoryBean implements Serializable {
         category.setName(categoryEntity.getName());
         return category;
     }
-
-
 }
 

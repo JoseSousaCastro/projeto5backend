@@ -1,6 +1,5 @@
 package project5.websocket;
 
-import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
 import jakarta.inject.Inject;
@@ -13,11 +12,10 @@ import project5.entity.UserEntity;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 @Singleton
-@ServerEndpoint("/websocket/notifications/{token}")
-public class WSNotifications {
+@ServerEndpoint("/websocket/dashboard/{token}")
+public class WSDashboard {
 
     HashMap<String, Session> sessions = new HashMap<String, Session>();
 
@@ -27,25 +25,23 @@ public class WSNotifications {
     @EJB
     private UserDao userDao;
 
-    public void send(String username, String notification) {
-        Session session = sessions.get(username);
-        System.out.println("Username no WSNotifications : " + username);
-        System.out.println("Session no WSNotifications : " + session);
-        System.out.println("Notification no WSNotifications : " + notification);
-        if (session != null) {
-            System.out.println("sending.......... " + notification);
-            try {
-                session.getBasicRemote().sendText(notification);
-                System.out.println("Notification sent!");
-            } catch (IOException e) {
-                System.out.println("Something went wrong!");
+    public void send(String msg) {
+        for (Session session : sessions.values()) {
+            if (session.isOpen()) {
+                System.out.println("Sending message: " + msg);
+                try {
+                    session.getBasicRemote().sendText(msg);
+                } catch (IOException e) {
+                    System.out.println("Error sending message to session: " + e.getMessage());
+                }
             }
         }
     }
 
+
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token) {
-        System.out.println("A new notifications WebSocket session is opened for client with token: " + token);
+        System.out.println("A new dashboard WebSocket session is opened for client with token: " + token);
         UserEntity receiver = userDao.findUserByToken(token);
         String usernameId = receiver.getUsername();
         System.out.println("usernameId: " + usernameId);
@@ -57,7 +53,7 @@ public class WSNotifications {
 
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {
-        System.out.println("Notifications Websocket session is closed with CloseCode: " +
+        System.out.println("Dashboard Websocket session is closed with CloseCode: " +
                 reason.getCloseCode() + ": " + reason.getReasonPhrase());
         for (String key : sessions.keySet()) {
             if (sessions.get(key) == session)

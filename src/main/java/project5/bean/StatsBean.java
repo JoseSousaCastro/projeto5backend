@@ -5,9 +5,11 @@ import jakarta.ejb.Stateless;
 import project5.dao.CategoryDao;
 import project5.dao.TaskDao;
 import project5.dao.UserDao;
+import project5.dto.Category;
 import project5.dto.RegistInfoCategory;
 import project5.dto.RegistInfoTask;
 import project5.dto.RegistInfoUser;
+import project5.entity.CategoryEntity;
 import project5.entity.TaskEntity;
 import project5.entity.UserEntity;
 
@@ -50,19 +52,19 @@ public class StatsBean implements Serializable {
     // Tasks by user
 
     public int getNumberOfTasksByUser(String username) {
-        return taskDao.findTasksByUser(userDao.findUserByUsername(username)).size();
+        return taskDao.findTasksNotDeletedNorErasedByUser(userDao.findUserByUsername(username)).size();
     }
 
     public int getNumberOfTodoTasksByUser(String username) {
-        return taskDao.findTasksByUserAndStateId(userDao.findUserByUsername(username), 100).size();
+        return taskDao.findTasksNotDeletedeNorErsasedByUserAndStateId(userDao.findUserByUsername(username), 100).size();
     }
 
     public int getNumberOfDoingTasksByUser(String username) {
-        return taskDao.findTasksByUserAndStateId(userDao.findUserByUsername(username), 200).size();
+        return taskDao.findTasksNotDeletedeNorErsasedByUserAndStateId(userDao.findUserByUsername(username), 200).size();
     }
 
     public int getNumberOfDoneTasksByUser(String username) {
-        return taskDao.findTasksByUserAndStateId(userDao.findUserByUsername(username), 300).size();
+        return taskDao.findTasksNotDeletedeNorErsasedByUserAndStateId(userDao.findUserByUsername(username), 300).size();
     }
 
 
@@ -117,23 +119,34 @@ public class StatsBean implements Serializable {
 
     // Categories Stats
     public ArrayList<RegistInfoCategory> getNumberOfCategoriesFromMostFrequentToLeast() {
+        // Obtenha todas as categorias
+        ArrayList<Category> allCategories = categoryBean.findAllCategories();
+
+        // Inicialize um mapa para armazenar a contagem de tarefas para cada categoria
+        Map<String, Integer> categoryTasksCount = new HashMap<>();
+
+        // Obtenha todas as tarefas
         List<TaskEntity> tasks = taskDao.findAllTasksNotErased();
-        ArrayList<RegistInfoCategory> registInfoCategories = new ArrayList<>();
+
+        // Contabilize o número de tarefas para cada categoria
         for (TaskEntity task : tasks) {
             String category = task.getCategory().getName();
-            boolean found = false;
-            for (RegistInfoCategory registInfoCategory : registInfoCategories) {
-                if (registInfoCategory.getCategory().equals(category)) {
-                    registInfoCategory.increment();
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                registInfoCategories.add(new RegistInfoCategory(category));
-            }
+            categoryTasksCount.put(category, categoryTasksCount.getOrDefault(category, 0) + 1);
         }
+
+        // Inicialize a lista de informações de registro de categoria
+        ArrayList<RegistInfoCategory> registInfoCategories = new ArrayList<>();
+
+        // Preencha a lista com todas as categorias e suas contagens de tarefas
+        for (Category category : allCategories) {
+            String categoryName = category.getName();
+            int taskCount = categoryTasksCount.getOrDefault(categoryName, 0);
+            registInfoCategories.add(new RegistInfoCategory(categoryName, taskCount));
+        }
+
+        // Ordene a lista pelo número de tarefas em ordem decrescente
         registInfoCategories.sort((a, b) -> b.getQuantity() - a.getQuantity());
+
         return registInfoCategories;
     }
 

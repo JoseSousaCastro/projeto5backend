@@ -13,6 +13,7 @@ import project5.entity.UserEntity;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Path("/users")
 public class UserService {
@@ -885,6 +886,22 @@ public class UserService {
             String usernameSender = userSender.getUsername();
             ArrayList<ChatMessage> messages = chatBean.getAllChatMessagesBetweenUsers(usernameSender, usernameReceiver);
             response = Response.status(200).entity(messages).build();
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/getALlUnreadNotifications")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllUnreadNotifications (@HeaderParam("token") String token) {
+        Response response;
+        if (userBean.isAuthenticated(token)) {
+            UserEntity userReceiver = userDao.findUserByToken(token);
+            String usernameReceiver = userReceiver.getUsername();
+            Map<String, Integer> unreadNotificationCounts = chatBean.countUnreadNotificationsBySender(chatBean.getAllNotificationsByReceiver(usernameReceiver));
+            response = Response.status(200).entity(unreadNotificationCounts).build();
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
