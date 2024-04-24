@@ -60,8 +60,10 @@ public class WSNotifications {
         System.out.println("WSNotifications session is closed with CloseCode: " +
                 reason.getCloseCode() + ": " + reason.getReasonPhrase());
         for (String key : sessions.keySet()) {
-            if (sessions.get(key) == session)
+            if (sessions.get(key) == session) {
                 sessions.remove(key);
+                break;
+            }
         }
     }
 

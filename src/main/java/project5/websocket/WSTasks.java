@@ -26,7 +26,9 @@ public class WSTasks {
     private UserDao userDao;
 
     public void send(String msg) {
+        System.out.println("Sending message via WSTasks: " + msg);
         for (Session session : sessions.values()) {
+            System.out.println("Session on WSTasks: " + session);
             if (session.isOpen()) {
                 System.out.println("Sending message via WSTasks: " + msg);
                 try {
@@ -55,8 +57,10 @@ public class WSTasks {
         System.out.println("WSTasks session is closed with CloseCode: " +
                 reason.getCloseCode() + ": " + reason.getReasonPhrase());
         for (String key : sessions.keySet()) {
-            if (sessions.get(key) == session)
+            if (sessions.get(key) == session) {
                 sessions.remove(key);
+                break;
+            }
         }
     }
 
