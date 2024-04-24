@@ -28,11 +28,11 @@ public class WSDashboard {
     public void send(String msg) {
         for (Session session : sessions.values()) {
             if (session.isOpen()) {
-                System.out.println("Sending message: " + msg);
+                System.out.println("Sending message via WSDashboard: " + msg);
                 try {
                     session.getBasicRemote().sendText(msg);
                 } catch (IOException e) {
-                    System.out.println("Error sending message to session: " + e.getMessage());
+                    System.out.println("Error sending message to session via WSDashboard: " + e.getMessage());
                 }
             }
         }
@@ -41,19 +41,19 @@ public class WSDashboard {
 
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token) {
-        System.out.println("A new dashboard WebSocket session is opened for client with token: " + token);
+        System.out.println("A new WSDashboard session is opened for client with token: " + token);
         UserEntity receiver = userDao.findUserByToken(token);
         String usernameId = receiver.getUsername();
-        System.out.println("usernameId: " + usernameId);
+        System.out.println("WSDashboard usernameId: " + usernameId);
         sessions.put(usernameId, session);
-        System.out.println("Session added to sessions map: " + session);
-        System.out.println("Sessions map: " + sessions);
-        System.out.println("Session get usernameId: " + sessions.get(usernameId));
+        System.out.println("Session added to sessions map on WSDashboard: " + session);
+        System.out.println("Sessions map on WSDashboard: " + sessions);
+        System.out.println("WSDashboard session get usernameId: " + sessions.get(usernameId));
     }
 
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {
-        System.out.println("Dashboard Websocket session is closed with CloseCode: " +
+        System.out.println("WSDashboard session is closed with CloseCode: " +
                 reason.getCloseCode() + ": " + reason.getReasonPhrase());
         for (String key : sessions.keySet()) {
             if (sessions.get(key) == session)
@@ -62,7 +62,7 @@ public class WSDashboard {
     }
 
     @OnMessage
-    public void toDoOnMessage(Session session, String notification, @PathParam("token") String token) {
-        System.out.println("Received notification: " + notification);
+    public void toDoOnMessage(Session session, String message, @PathParam("token") String token) {
+        System.out.println("Received message on WSDashboard: " + message);
     }
 }

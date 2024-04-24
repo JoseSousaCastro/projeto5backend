@@ -33,31 +33,31 @@ public class WSNotifications {
         System.out.println("Session no WSNotifications : " + session);
         System.out.println("Notification no WSNotifications : " + notification);
         if (session != null) {
-            System.out.println("sending.......... " + notification);
+            System.out.println("sending via WSNotifications.......... " + notification);
             try {
                 session.getBasicRemote().sendText(notification);
-                System.out.println("Notification sent!");
+                System.out.println("Notification sent via WSNotifications!");
             } catch (IOException e) {
-                System.out.println("Something went wrong!");
+                System.out.println("Something went wrong during send method on WSNotifications!");
             }
         }
     }
 
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token) {
-        System.out.println("A new notifications WebSocket session is opened for client with token: " + token);
+        System.out.println("A new WSNotifications session is opened for client with token: " + token);
         UserEntity receiver = userDao.findUserByToken(token);
         String usernameId = receiver.getUsername();
-        System.out.println("usernameId: " + usernameId);
+        System.out.println("WSNotifications usernameId: " + usernameId);
         sessions.put(usernameId, session);
-        System.out.println("Session added to sessions map: " + session);
-        System.out.println("Sessions map: " + sessions);
-        System.out.println("Session get usernameId: " + sessions.get(usernameId));
+        System.out.println("Session added to sessions map on WSNotifications: " + session);
+        System.out.println("Sessions map on WSNotifications: " + sessions);
+        System.out.println("WSNotifications session get usernameId: " + sessions.get(usernameId));
     }
 
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {
-        System.out.println("Notifications Websocket session is closed with CloseCode: " +
+        System.out.println("WSNotifications session is closed with CloseCode: " +
                 reason.getCloseCode() + ": " + reason.getReasonPhrase());
         for (String key : sessions.keySet()) {
             if (sessions.get(key) == session)
@@ -67,6 +67,6 @@ public class WSNotifications {
 
     @OnMessage
     public void toDoOnMessage(Session session, String notification, @PathParam("token") String token) {
-        System.out.println("Received notification: " + notification);
+        System.out.println("Received notification on WSNotifications: " + notification);
     }
 }
