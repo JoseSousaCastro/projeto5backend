@@ -46,12 +46,6 @@ public class TaskBean implements Serializable {
 
     public boolean newTask(Task task, String token) {
         boolean created = false;
-        logger.info("Task " + task.getTitle() + " is added successfully by " + userDao.findUserByToken(token).getUsername());
-        logger.debug("Sample debug message");
-        logger.info("Sample info message");
-        logger.warn("Sample warn message");
-        logger.error("Sample error message");
-        logger.fatal("Sample fatal message");
         task.generateId();
         task.setInitialStateId();
         task.setOwner(userBean.convertUserEntitytoUserDto(userDao.findUserByToken(token)));
@@ -63,6 +57,7 @@ public class TaskBean implements Serializable {
         }
         wsDashboard.send("stats have been changed");
         wsTasks.send("tasks have been changed");
+        logger.info("Task created: " + task.getTitle());
         return created;
     }
 
@@ -119,6 +114,7 @@ public class TaskBean implements Serializable {
         }
         wsDashboard.send("stats have been changed");
         wsTasks.send("tasks have been changed");
+        logger.info("Task edited: " + task.getTitle());
         return edited;
     }
 
@@ -142,6 +138,7 @@ public class TaskBean implements Serializable {
         }
         wsDashboard.send("stats have been changed");
         wsTasks.send("tasks have been changed");
+        logger.info("Task status updated: " + taskId);
         return updated;
     }
 
@@ -156,6 +153,7 @@ public class TaskBean implements Serializable {
         }
         wsDashboard.send("stats have been changed");
         wsTasks.send("tasks have been changed");
+        logger.info("Task erased status switched: " + id);
         return swithedErased;
     }
 
@@ -171,6 +169,7 @@ public class TaskBean implements Serializable {
         }
         wsDashboard.send("stats have been changed");
         wsTasks.send("tasks have been changed");
+        logger.info("Task permanently deleted: " + id);
         return removed;
     }
 
@@ -230,6 +229,7 @@ public class TaskBean implements Serializable {
         }
         wsDashboard.send("stats have been changed");
         wsTasks.send("tasks have been changed");
+        logger.info("All tasks from user erased: " + username);
         return erased;
     }
 

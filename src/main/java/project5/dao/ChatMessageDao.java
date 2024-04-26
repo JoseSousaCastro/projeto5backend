@@ -100,7 +100,9 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
         System.out.println("messageEntity" + messageEntity);
         if (messageEntity != null) {
             em.persist(messageEntity);
+            logger.info("ChatMessageEntity created: " + messageEntity);
         } else {
+            logger.error("Error: messageEntity is null");
             System.out.println("Error: messageEntity is null");
         }
     }
@@ -108,7 +110,9 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
     public void update(ChatMessageEntity messageEntity) {
         if (messageEntity != null) {
             em.merge(messageEntity);
+            logger.info("ChatMessageEntity updated: " + messageEntity);
         } else {
+            logger.error("Error: messageEntity is null");
             System.out.println("Error: messageEntity is null");
         }
     }

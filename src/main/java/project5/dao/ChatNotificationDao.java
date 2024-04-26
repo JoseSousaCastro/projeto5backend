@@ -71,9 +71,9 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity> {
         System.out.println("senderUsername: " + senderUsername);
         System.out.println("unreadNotifications: " + unreadNotifications);
         if (!unreadNotifications.isEmpty()) {
-            // Marca a primeira notificação como lida
             unreadNotifications.get(0).setRead(true);
             em.merge(unreadNotifications.get(0));
+            logger.info("Marked the first notification as read");
 
             // Marca as notificações restantes como lidas, se houver
             for (int i = 1; i < unreadNotifications.size(); i++) {
@@ -81,6 +81,7 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity> {
                 notification.setRead(true);
                 em.merge(notification);
             }
+            logger.info("Marked the remaining notifications as read");
         }
     }
 
@@ -122,8 +123,10 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity> {
         if (notificationEntity != null) {
             em.persist(notificationEntity);
         } else {
+            logger.error("Error: Chat Notification is null");
             System.out.println("Error: ChatNotificationEntity is null");
         }
+        logger.info("Chat Notification created");
     }
 
     public ChatNotificationEntity findLatestChatNotification(String senderUsername, String receiverUsername) {

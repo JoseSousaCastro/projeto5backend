@@ -32,6 +32,7 @@ public class CategoryBean implements Serializable {
             created = true;
             wsDashboard.send("stats have been changed");
         }
+        logger.info("Category created: " + name);
         return created;
     }
 
@@ -62,6 +63,7 @@ public class CategoryBean implements Serializable {
             deleted = categoryDao.deleteCategory(name);
         }
         wsDashboard.send("stats have been changed");
+        logger.info("Category deleted: " + name);
         return deleted;
     }
 
@@ -71,6 +73,7 @@ public class CategoryBean implements Serializable {
             edited = categoryDao.editCategory(name, newName);
         }
         wsDashboard.send("stats have been changed");
+        logger.info("Category edited: " + name + " to " + newName);
         return edited;
     }
 

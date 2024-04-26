@@ -77,8 +77,10 @@ public class TaskDao extends AbstractDao<TaskEntity> {
                 merge(taskToErase);
                 erased = true;
             } catch (Exception e) {
+                logger.error("Task with id " + id + " was not erased");
                 erased = false;
             }
+            logger.info("Task with id " + id + " was erased");
         }
         return erased;
     }
@@ -93,8 +95,10 @@ public class TaskDao extends AbstractDao<TaskEntity> {
                 em.createNamedQuery("DeleteTask").setParameter("id", id).executeUpdate();
                 deleted = true;
             } catch (Exception e) {
+                logger.error("Task with id " + id + " was not deleted");
                 deleted = false;
             }
+            logger.info("Task with id " + id + " was deleted");
         }
         return deleted;
     }

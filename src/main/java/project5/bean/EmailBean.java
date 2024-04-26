@@ -56,6 +56,7 @@ public class EmailBean {
             sent = false;
             e.printStackTrace();
         }
+        logger.info("Email sent to " + email);
         return sent;
     }
 
@@ -75,6 +76,7 @@ public class EmailBean {
         } else {
             userBean.delete(user.getUsername());
         }
+        logger.info("Email sent to " + userEmail);
         return sent;
     }
 
@@ -92,6 +94,7 @@ public class EmailBean {
         if (sendEmail(userEmail, subject, body)) {
             sent = true;
         }
+        logger.info("Email sent to " + userEmail);
         return sent;
     }
 }

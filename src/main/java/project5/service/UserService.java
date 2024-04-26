@@ -526,7 +526,7 @@ public class UserService implements Serializable {
             if (typeOfUser == 100 || typeOfUser == 200 || typeOfUser == 300) {
                 logger.info("User '{}' type of user is valid. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
                         username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
-                boolean updatedRole = userBean.updateUserEntityRole(username, typeOfUser);
+                userBean.updateUserEntityRole(username, typeOfUser);
                 logger.info("User '{}' role was updated successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
                         username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(Response.Status.OK).entity("Role updated with success").build(); //status code 200
@@ -547,17 +547,27 @@ public class UserService implements Serializable {
     @Path("/{username}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response removeUser(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
-
         Response response;
+        logger.info("User '{}' is trying to remove his account. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
-
+            logger.info("User '{}' is authenticated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             boolean removed = userBean.delete(username);
+            logger.info("User '{}' was removed successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (removed) {
+                logger.info("User '{}' was removed successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(200).entity("User removed successfully").build();
             } else {
+                logger.info("User '{}' was not removed. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(404).entity("User is not found").build();
             }
         } else {
+            logger.info("User '{}' is not authenticated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -568,10 +578,18 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
+        logger.info("User is trying to get all users. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get all users. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             List<User> allUsers = userBean.getUsers();
+            logger.info("User got all users successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(200).entity(allUsers).build();
         } else {
+            logger.info("User is not authenticated to get all users. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("You don't have permission").build();
         }
         return response;
@@ -582,10 +600,18 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsersByVisibility(@HeaderParam("token") String token, @PathParam("visible") boolean visible, @Context HttpServletRequest request) {
         Response response;
+        logger.info("User is trying to get all users by visibility. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token) && !userBean.userIsDeveloper(token)) {
+            logger.info("User is authenticated to get all users by visibility. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             List<User> users = userBean.getUsersByVisibility(visible);
+            logger.info("User got all users by visibility successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(200).entity(users).build();
         } else {
+            logger.info("User is not authenticated to get all users by visibility. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("You don't have permission").build();
         }
         return response;
@@ -596,10 +622,18 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser, @Context HttpServletRequest request) {
         Response response;
+        logger.info("User is trying to get all users by type. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token) && !userBean.userIsDeveloper(token)) {
+            logger.info("User is authenticated to get all users by type. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             List<User> users = userBean.getUsersByType(typeOfUser);
+            logger.info("User got all users by type successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(200).entity(users).build();
         } else {
+            logger.info("User is not authenticated to get all users by type. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("You don't have permission").build();
         }
         return response;
@@ -610,10 +644,18 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser, @PathParam("visible") boolean visible, @Context HttpServletRequest request) {
         Response response;
+        logger.info("User is trying to get all users by type and visibility. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token) && !userBean.userIsDeveloper(token)) {
+            logger.info("User is authenticated to get all users by type and visibility. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             List<User> users = userBean.getUsersByTypeAndVisibility(typeOfUser, visible);
+            logger.info("User got all users by type and visibility successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(200).entity(users).build();
         } else {
+            logger.info("User is not authenticated to get all users by type and visibility. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("You don't have permission").build();
         }
         return response;
@@ -624,18 +666,24 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("username") String username, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User is trying to get his information. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User userSearched = userBean.getUser(username);
-
-        //Verifica se o username existe na base de dados
+        logger.info("User '{}' got his information successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                userSearched, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userSearched == null) {
+            logger.info("User '{}' is not found. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             return response;
         }
-        //Verifica se token existe de quem consulta
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get his information. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.ok().entity(userSearched).build();
         } else {
+            logger.info("User is not authenticated to get his information. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -645,13 +693,19 @@ public class UserService implements Serializable {
     @Path("/tasks")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllTasks(@HeaderParam("token") String token, @Context HttpServletRequest request) {
-
         Response response;
-
+        logger.info("User is trying to get all tasks. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get all tasks. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             ArrayList<Task> allTasks = taskBean.getAllTasks(token);
+            logger.info("User got all tasks successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(Response.Status.OK).entity(allTasks).build();
         } else {
+            logger.info("User is not authenticated to get all tasks. Author: '{}. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -661,17 +715,27 @@ public class UserService implements Serializable {
     @Path("/{username}/tasks")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllTasksFromUser(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
-
         Response response;
-
+        logger.info("User is trying to get all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.thisTokenIsFromThisUsername(token, username) || userBean.userIsProductOwner(token) || userBean.userIsScrumMaster(token)) {
+                logger.info("User is authenticated to get all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 ArrayList<Task> userTasks = taskBean.getAllTasksFromUser(username, token);
+                logger.info("User got all tasks from user '{}' successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(Response.Status.OK).entity(userTasks).build();
             } else {
+                logger.info("User is not authenticated to get all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(406).entity("You don't have permission for this request").build();
             }
         } else {
+            logger.info("User is not authenticated to get all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -683,26 +747,44 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response newTask(@HeaderParam("token") String token, @PathParam("username") String username, Task task, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User is trying to add a new task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to add a new task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.thisTokenIsFromThisUsername(token, username)) {
+                logger.info("User is authenticated to add a new task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 try {
+                    logger.info("User is trying to add a new task to user '{}' successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                            username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     boolean added = taskBean.newTask(task, token);
+                    logger.info("User added a new task to user '{}' successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                            username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     if (added) {
+                        logger.info("User added a new task to user '{}' successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(201).entity("Task created successfully").build();
                     } else {
+                        logger.info("User was not able to add a new task to user '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(404).entity("Impossible to create task. Verify all fields").build();
                     }
                 } catch (Exception e) {
+                    logger.info("User was not able to add a new task to user '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                            username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     response = Response.status(404).entity("Something went wrong. A new category was not created.").build();
                 }
             } else {
+                logger.info("User is not authenticated to add a new task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(Response.Status.BAD_REQUEST).entity("Invalid username on path").build();
             }
         } else {
+            logger.info("User is not authenticated to add a new task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
-
         return response;
     }
 
@@ -710,22 +792,35 @@ public class UserService implements Serializable {
     @Path("/updatetask/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateTask(@HeaderParam("token") String token, @PathParam("id") String id, Task task, @Context HttpServletRequest request) {
-
         Response response;
+        logger.info("User is trying to update a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to update a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.userIsTaskOwner(token, id) || userBean.userIsScrumMaster(token) || userBean.userIsProductOwner(token)) {
+                logger.info("User has permission to update a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 boolean updated = taskBean.updateTask(task, id);
-                System.out.println(task.getCategory().getName() + " " + task.getOwner() + " " + task.getErased() + " " + task.getStateId() + " "
-                        + task.getDescription() + " " + task.getTitle() + " " + task.getId());
+                logger.info("User updated a task successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 if (updated) {
+                    logger.info("User updated a task successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     response = Response.status(200).entity("Task updated successfully").build();
                 } else {
+                    logger.info("User was not able to update a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     response = Response.status(404).entity("Impossible to update task. Verify all fields").build();
                 }
             } else {
+                logger.info("User does not have permission to update a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(403).entity("You don't have permission to update this task").build();
             }
         } else {
+            logger.info("User is not authenticated to update a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -736,16 +831,27 @@ public class UserService implements Serializable {
     @Path("/tasks/{taskId}/{newStateId}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateTaskStatus(@HeaderParam("token") String token, @PathParam("taskId") String taskId, @PathParam("newStateId") int stateId, @Context HttpServletRequest request) {
-
         Response response;
+        logger.info("User is trying to update a task status. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to update a task status. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             boolean updated = taskBean.updateTaskStatus(taskId, stateId);
+            logger.info("User updated a task status successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (updated) {
+                logger.info("Task status updated successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(200).entity("Task status updated successfully").build();
             } else {
+                logger.info("Task status was not updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(404).entity("Impossible to update task status. Task not found or invalid status").build();
             }
         } else {
+            logger.info("User is not authenticated to update a task status. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -755,24 +861,41 @@ public class UserService implements Serializable {
     @Path("/{taskId}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response eraseTask(@HeaderParam("token") String token, @PathParam("taskId") String id, @Context HttpServletRequest request) {
-
         Response response;
+        logger.info("User is trying to erase a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to erase a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.userIsScrumMaster(token) || userBean.userIsProductOwner(token)) {
+                logger.info("User has permission to erase a task. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 try {
+                    logger.info("User is trying to erase a task successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     boolean switched = taskBean.switchErasedTaskStatus(id);
                     if (switched) {
+                        logger.info("User erased a task successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(200).entity("Task erased status switched successfully").build();
                     } else {
+                        logger.info("Task erased status was not switched. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(404).entity("Task with this id is not found").build();
                     }
                 } catch (Exception e) {
+                    logger.info("Task erased status was not switched. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     response = Response.status(404).entity("Something went wrong. The task erased status was switched.").build();
                 }
             } else {
+                logger.info("User does not have permission to erase a task. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(403).entity("You don't have permission to switch the erased status of a task").build();
             }
         } else {
+            logger.info("User is not authenticated to erase a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -782,24 +905,41 @@ public class UserService implements Serializable {
     @Path("/eraseAllTasks/{username}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response eraseAllTasksFromUser(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
-
         Response response;
+        logger.info("User is trying to erase all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to erase all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.userIsProductOwner(token)) {
+                logger.info("User has permission to erase all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 try {
+                    logger.info("User is trying to erase all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     boolean erased = taskBean.eraseAllTasksFromUser(username);
                     if (erased) {
+                        logger.info("User erased all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(200).entity("All tasks were erased successfully").build();
                     } else {
+                        logger.info("All tasks from user '{}' were not erased. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(404).entity("Impossible to erase tasks").build();
                     }
                 } catch (Exception e) {
+                    logger.info("All tasks from user '{}' were not erased. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     response = Response.status(404).entity("Something went wrong. The tasks were not erased.").build();
                 }
             } else {
+                logger.info("User does not have permission to erase all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(403).entity("You don't have permission to erase these tasks").build();
             }
         } else {
+            logger.info("User is not authenticated to erase all tasks from user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -809,24 +949,41 @@ public class UserService implements Serializable {
     @Path("/delete/{taskId}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteTask(@HeaderParam("token") String token, @PathParam("taskId") String id, @Context HttpServletRequest request) {
-
         Response response;
+        logger.info("User is trying to delete a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to delete a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.userIsProductOwner(token)) {
+                logger.info("User has permission to delete a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 try {
+                    logger.info("User is trying to delete a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     boolean deleted = taskBean.permanentlyDeleteTask(id);
                     if (deleted) {
+                        logger.info("User deleted a task successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(200).entity("Task removed successfully").build();
                     } else {
+                        logger.info("Task was not deleted. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(404).entity("Task with this id is not found").build();
                     }
                 } catch (Exception e) {
+                    logger.info("Task was not deleted. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     response = Response.status(404).entity("Something went wrong. The task was not removed.").build();
                 }
             } else {
+                logger.info("User does not have permission to delete a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(403).entity("You don't have permission to delete a task").build();
             }
         } else {
+            logger.info("User is not authenticated to delete a task. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -836,16 +993,27 @@ public class UserService implements Serializable {
     @Path("/tasks/{category}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTasksByCategory(@HeaderParam("token") String token, @PathParam("category") String category, @Context HttpServletRequest request) {
-
         Response response;
+        logger.info("User is trying to get tasks by category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get tasks by category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.userIsScrumMaster(token) || userBean.userIsProductOwner(token)) {
+                logger.info("User has permission to get tasks by category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 ArrayList<Task> tasksByCategory = taskBean.getTasksByCategory(category);
+                logger.info("User got tasks by category successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(200).entity(tasksByCategory).build();
             } else {
+                logger.info("User does not have permission to get tasks by category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(403).entity("You don't have permission for this request").build();
             }
         } else {
+            logger.info("User is not authenticated to get tasks by category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -856,14 +1024,26 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getErasedTasks(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
+        logger.info("User is trying to get erased tasks. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get erased tasks. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.userIsScrumMaster(token) || userBean.userIsProductOwner(token)) {
+                logger.info("User has permission to get erased tasks. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 ArrayList<Task> erasedTasks = taskBean.getErasedTasks();
+                logger.info("User got erased tasks successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(200).entity(erasedTasks).build();
             } else {
+                logger.info("User does not have permission to get erased tasks. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(403).entity("You don't have permission for this request").build();
             }
         } else {
+            logger.info("User is not authenticated to get erased tasks. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -873,57 +1053,91 @@ public class UserService implements Serializable {
     @Path("/newCategory")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response newCategory(@HeaderParam("token") String token, Category category, @Context HttpServletRequest request) {
-
         Response response;
-
+        logger.info("User is trying to create a new category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to create a new category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.userIsProductOwner(token)) {
+                logger.info("User has permission to create a new category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 if (categoryBean.categoryExists(category.getName())) {
+                    logger.info("Category with this name already exists. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     response = Response.status(409).entity("Category with this name already exists").build();
                 } else {
                     try {
+                        logger.info("User is trying to create a new category successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         boolean added = categoryBean.newCategory(category.getName());
                         if (added) {
+                            logger.info("User created a new category successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                             response = Response.status(201).entity("Category created successfully").build();
                         } else {
+                            logger.info("Category was not created. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                             response = Response.status(404).entity("Impossible to create category. Verify all fields").build();
                         }
                     } catch (Exception e) {
+                        logger.info("Category was not created. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(404).entity("Something went wrong. A new category was not created.").build();
                     }
                 }
             } else {
+                logger.info("User does not have permission to create a new category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(403).entity("You don't have permission to create a category").build();
             }
         } else {
+            logger.info("User is not authenticated to create a new category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
-        return response; // FALTA FAZER VERIFICAÇÃO DAS PERMISSÕES DO UTILIZADOR PARA CRIAR CATEGORIA
+        return response;
     }
 
     @DELETE
     @Path("/deleteCategory/{categoryName}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteCategory(@HeaderParam("token") String token, @PathParam("categoryName") String categoryName, @Context HttpServletRequest request) {
-        System.out.println("********************** CATEGORY NAME " + categoryName);
         Response response;
-
+        logger.info("User is trying to delete a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to delete a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.userIsProductOwner(token)) {
+                logger.info("User has permission to delete a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 try {
+                    logger.info("User is trying to delete a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     boolean deleted = categoryBean.deleteCategory(categoryName);
                     if (deleted) {
+                        logger.info("User deleted a category successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(200).entity("Category removed successfully").build();
                     } else {
+                        logger.info("Category was not deleted. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(400).entity("Category with this name can't be deleted").build();
                     }
                 } catch (Exception e) {
+                    logger.info("Category was not deleted. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     response = Response.status(404).entity("Something went wrong. The category was not removed.").build();
                 }
             } else {
+                logger.info("User does not have permission to delete a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(403).entity("You don't have permission to delete a category").build();
             }
         } else {
+            logger.info("User is not authenticated to delete a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -933,27 +1147,41 @@ public class UserService implements Serializable {
     @Path("/editCategory/{categoryName}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response editCategory(@HeaderParam("token") String token, @PathParam("categoryName") String categoryName, @HeaderParam("newCategoryName") String newCategoryName, @Context HttpServletRequest request) {
-
         Response response;
-
+        logger.info("User is trying to edit a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to edit a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (userBean.userIsProductOwner(token)) {
+                logger.info("User has permission to edit a category. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 try {
-                    System.out.println("########################## TRY " + categoryName + " " + newCategoryName);
+                    logger.info("User is trying to edit a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     boolean edited = categoryBean.editCategory(categoryName, newCategoryName);
-                    System.out.println("************************** EDITED ENDPOINT " + edited + " *********************************");
                     if (edited) {
+                        logger.info("User edited a category successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(200).entity("Category edited successfully").build();
                     } else {
+                        logger.info("Category with required name is not found. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                         response = Response.status(404).entity("Category with this name is not found").build();
                     }
                 } catch (Exception e) {
+                    logger.info("Category was not edited. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                            request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                     response = Response.status(404).entity("Something went wrong. The category was not edited.").build();
                 }
             } else {
+                logger.info("User does not have permission to edit a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(403).entity("You don't have permission to edit a category").build();
             }
         } else {
+            logger.info("User is not authenticated to edit a category. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -963,17 +1191,27 @@ public class UserService implements Serializable {
     @Path("/categories")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllCategories(@HeaderParam("token") String token, @Context HttpServletRequest request) {
-
         Response response;
-
+        logger.info("User is trying to get all categories. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get all categories. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             try {
+                logger.info("User is trying to get all categories successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 List<Category> allCategories = categoryBean.findAllCategories();
+                logger.info("User got all categories successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(200).entity(allCategories).build();
             } catch (Exception e) {
+                logger.info("All categories were not found. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(404).entity("Something went wrong. The categories were not found.").build();
             }
         } else {
+            logger.info("User is not authenticated to get all categories. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -984,34 +1222,53 @@ public class UserService implements Serializable {
     @Path("/stats")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllStats(@HeaderParam("token") String token, @Context HttpServletRequest request) {
-
         Response response;
-
+        logger.info("User is trying to get all stats. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get all stats. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             try {
+                logger.info("User is trying to get all stats successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 int totalUsers = statsBean.getNumberOfUsers();
+                logger.info("Total users: '{}'.", totalUsers);
                 int totalConfirmedUsers = statsBean.getNumberOfConfirmedUsers();
+                logger.info("Total confirmed users: '{}'.", totalConfirmedUsers);
                 int totalUnconfirmedUsers = statsBean.getNumberOfUnconfirmedUsers();
+                logger.info("Total unconfirmed users: '{}'.", totalUnconfirmedUsers);
                 ArrayList<RegistInfoUser> usersOverTime = statsBean.getSumOfUsersPerMonth();
+                logger.info("Users over time: '{}'.", usersOverTime);
 
                 int totalTasks = statsBean.getNumberOfTasks();
+                logger.info("Total tasks: '{}'.", totalTasks);
                 int totalToDoTasks = statsBean.getNumberOfTodoTasks();
+                logger.info("Total to do tasks: '{}'.", totalToDoTasks);
                 int totalDoingTasks = statsBean.getNumberOfDoingTasks();
+                logger.info("Total doing tasks: '{}'.", totalDoingTasks);
                 int totalDoneTasks = statsBean.getNumberOfDoneTasks();
+                logger.info("Total done tasks: '{}'.", totalDoneTasks);
                 ArrayList<RegistInfoTask> tasksCompletedOverTime = statsBean.getSumOfCompletedTasksPerMonth();
-
+                logger.info("Tasks completed over time: '{}'.", tasksCompletedOverTime);
                 double tasksPerUser = statsBean.getAverageNumberOfTasksPerUser();
+                logger.info("Tasks per user: '{}'.", tasksPerUser);
                 double averageTaskTime = statsBean.getAverageOfTaskTimes();
+                logger.info("Average task time: '{}'.", averageTaskTime);
 
                 ArrayList<RegistInfoCategory> categoriesListDesc = statsBean.getNumberOfCategoriesFromMostFrequentToLeast();
-
+                logger.info("Categories list: '{}'.", categoriesListDesc);
                 response = Response.status(200).entity(new Stats(totalUsers, totalConfirmedUsers, totalUnconfirmedUsers, totalTasks, totalToDoTasks,
                         totalDoingTasks, totalDoneTasks, tasksPerUser, averageTaskTime, categoriesListDesc, usersOverTime, tasksCompletedOverTime)).build();
-
+                logger.info("User got all stats successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             } catch (Exception e) {
+                logger.info("All stats were not found. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(404).entity("Something went wrong. The stats were not found.").build();
             }
         } else {
+            logger.info("User is not authenticated to get all stats. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -1021,22 +1278,33 @@ public class UserService implements Serializable {
     @Path("/{username}/stats")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUserStats(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
-
         Response response;
-
+        logger.info("User is trying to get stats of user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get stats of user '{}'. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             try {
                 int totalUserTasks = statsBean.getNumberOfTasksByUser(username);
+                logger.info("Total tasks of user '{}': '{}'.", username, totalUserTasks);
                 int totalUserToDoTasks = statsBean.getNumberOfTodoTasksByUser(username);
+                logger.info("Total to do tasks of user '{}': '{}'.", username, totalUserToDoTasks);
                 int totalUserDoingTasks = statsBean.getNumberOfDoingTasksByUser(username);
+                logger.info("Total doing tasks of user '{}': '{}'.", username, totalUserDoingTasks);
                 int totalUserDoneTasks = statsBean.getNumberOfDoneTasksByUser(username);
+                logger.info("Total done tasks of user '{}': '{}'.", username, totalUserDoneTasks);
 
                 response = Response.status(200).entity(new UserStats(totalUserTasks, totalUserToDoTasks, totalUserDoingTasks, totalUserDoneTasks)).build();
-
+                logger.info("User got stats of user '{}' successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             } catch (Exception e) {
+                logger.info("Stats of user '{}' were not found. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(404).entity("Something went wrong. The stats were not found.").build();
             }
         } else {
+            logger.info("User is not authenticated to get stats of user '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -1047,13 +1315,25 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllMessagesBetweenUsers(@HeaderParam("token") String token, @PathParam("usernameReceiver") String usernameReceiver, @Context HttpServletRequest request) {
         Response response;
+        logger.info("User is trying to get all messages between users. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get all messages between users. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             UserEntity userSender = userDao.findUserByToken(token);
+            logger.info("User sender: '{}'.", userSender.getUsername());
             String usernameSender = userSender.getUsername();
+            logger.info("User receiver: '{}'.", usernameReceiver);
             ArrayList<ChatMessage> messages = chatBean.getAllChatMessagesBetweenUsers(usernameSender, usernameReceiver);
+            logger.info("Messages: '{}'.", messages);
             chatBean.setMessagesAsReadFromSenderToUser(usernameSender, usernameReceiver);
+            logger.info("Messages marked as read.");
             response = Response.status(200).entity(messages).build();
+            logger.info("User got all messages between users successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         } else {
+            logger.info("User is not authenticated to get all messages between users. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -1064,13 +1344,23 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUnreadNotifications(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
+        logger.info("User is trying to get all notifications. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to get all notifications. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             UserEntity userReceiver = userDao.findUserByToken(token);
+            logger.info("User receiver: '{}'.", userReceiver.getUsername());
             String usernameReceiver = userReceiver.getUsername();
+            logger.info("User receiver: '{}'.", usernameReceiver);
             ArrayList<ChatNotification> notifications = chatBean.getAllNotificationsByReceiver(usernameReceiver);
-            System.out.println("Notifications: " + notifications);
+            logger.info("Notifications: '{}'.", notifications);
             response = Response.status(200).entity(notifications).build();
+            logger.info("User got all notifications successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         } else {
+            logger.info("User is not authenticated to get all notifications. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -1082,15 +1372,23 @@ public class UserService implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response markNotificationsAsRead(@HeaderParam("token") String token, @PathParam("senderUsername") String senderUsername, @Context HttpServletRequest request) {
         Response response;
+        logger.info("User is trying to mark notifications as read. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
+            logger.info("User is authenticated to mark notifications as read. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             UserEntity userReceiver = userDao.findUserByToken(token);
-            System.out.println("User receiver: " + userReceiver.getUsername());
-            System.out.println("User sender: " + senderUsername);
+            logger.info("User receiver: '{}'.", userReceiver.getUsername());
             String usernameReceiver = userReceiver.getUsername();
+            logger.info("User sender: '{}'.", senderUsername);
             chatBean.setNotificationsAsReadFromSenderToUser(usernameReceiver, senderUsername);
-            System.out.println("Notifications marked as read");
+            logger.info("Notifications marked as read.");
             response = Response.status(200).entity("Notifications marked as read").build();
+            logger.info("User marked notifications as read successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         } else {
+            logger.info("User is not authenticated to mark notifications as read. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;

@@ -69,7 +69,9 @@ public class ChatBean {
             ChatMessageEntity newMessage = new ChatMessageEntity(sender, receiver, messageText, sentAt, isRead, delivered);
             System.out.println("Saving message: " + newMessage);
             messageDao.create(newMessage);
+            logger.info("Message saved: " + newMessage);
         } else {
+            logger.error("Sender or receiver not found. Unable to save message.");
             System.out.println("Sender or receiver not found. Unable to save message.");
         }
     }
@@ -83,7 +85,9 @@ public class ChatBean {
             System.out.println("Saving notification: " + newNotification);
             notificationDao.create(newNotification);
             findLatestChatMessageToMarkAsDelivered(sender.getUsername(), receiver.getUsername());
+            logger.info("Notification saved: " + newNotification);
         } else {
+            logger.error("Sender or receiver not found. Unable to save notification.");
             System.out.println("Sender or receiver not found. Unable to save notification.");
         }
     }

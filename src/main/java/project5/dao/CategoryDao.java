@@ -44,7 +44,6 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
     }
 
     public boolean deleteCategory(String name) {
-        System.out.println("############ CATEGORY DAO " + name);
         boolean deleted = false;
         if (name == null) {
             deleted = false;
@@ -60,6 +59,7 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
                 deleted = false;
             }
         }
+        logger.info("Category " + name + " deleted: " + deleted);
         return deleted;
     }
 
@@ -70,7 +70,6 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
         } else {
             try {
                 CategoryEntity categoryEntity = findCategoryByName(name);
-                System.out.println("*********************** " + categoryEntity.getName() + " ***********************");
                 if (categoryEntity != null) {
                     categoryEntity.setName(newName);
                     merge(categoryEntity);
@@ -80,7 +79,7 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
                 edited = false;
             }
         }
-        System.out.println("*********************** EDITED = " + edited + " ***********************");
+        logger.info("Category " + name + " edited: " + edited);
         return edited;
     }
 
