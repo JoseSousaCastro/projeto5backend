@@ -11,14 +11,16 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import project5.entity.UserEntity;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.*;
 
 @Path("/users")
-public class UserService {
+public class UserService implements Serializable {
 
     @Inject
     UserBean userBean;
@@ -51,21 +53,26 @@ public class UserService {
 
         if (loggedUser != null) {
             response = Response.status(200).entity(loggedUser).build();
-            logger.info("User '{}' logged in. Author: '{}' , IP: '{}'", loggedUser.getUsername(), request.getRemoteUser(), request.getRemoteAddr());
+            logger.info("User '{}' logged in. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    loggedUser.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
+            logger.info("Failed login attempt. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         }
-
         return response;
     }
 
     @POST
     @Path("/logout")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response logout(@HeaderParam("token") String token) {
+    public Response logout(@HeaderParam("token") String token, @Context HttpServletRequest request) {
 
+        logger.info("User '{}' logged out. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                userBean.convertEntityByToken(token).getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.logout(token)) return Response.status(200).entity("Logout Successful!").build();
-
+        logger.info("Failed logout attempt. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         return Response.status(401).entity("Invalid Token!").build();
     }
 
@@ -73,36 +80,70 @@ public class UserService {
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response registerUser(User user) {
+    public Response registerUser(User user, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User '{}' is trying to register. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         boolean isUsernameAvailable = userBean.isUsernameAvailable(user);
+        logger.info("Username '{}' is available: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getUsername(), isUsernameAvailable, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         boolean isEmailValid = userBean.isEmailValid(user);
+        logger.info("Email '{}' is valid: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getEmail(), isEmailValid, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         boolean isFieldEmpty = userBean.isAnyFieldEmpty(user);
+        logger.info("All registration form fields have been filled in: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                isFieldEmpty, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         boolean isPhoneNumberValid = userBean.isPhoneNumberValid(user);
+        logger.info("Phone number '{}' is valid: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getPhone(), isPhoneNumberValid, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         boolean isImageValid = userBean.isImageUrlValid(user.getPhotoURL());
+        logger.info("Image URL '{}' is valid: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getPhotoURL(), isImageValid, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         long expirationTime = System.currentTimeMillis() + 48 * 60 * 60 * 1000; // 48 horas em milissegundos
+        logger.info("Expiration time for defining the password started at: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                expirationTime, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         user.setExpirationTime(expirationTime);
-        System.out.println("Expiration time: " + expirationTime);
         user.setConfirmed(false);
+        logger.info("User '{}' is not confirmed yet. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         user.setCreationDate(LocalDate.of(2021, 1, 1));
+        logger.info("User '{}' was created at: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getUsername(), user.getCreationDate(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         boolean newPassword = emailBean.sendConfirmationEmail(user);
+        logger.info("Email was sent to '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getEmail(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
 
         if (isFieldEmpty) {
+            logger.info("User registration failed. There's an empty field. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(422).entity("There's an empty field. ALl fields must be filled in").build();
         } else if (!isEmailValid) {
+            logger.info("User registration failed. Email '{}' is invalid. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    user.getEmail(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(422).entity("Invalid email").build();
         } else if (!isUsernameAvailable) {
+            logger.info("User registration failed. Username '{}' is already in use. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    user.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(Response.Status.CONFLICT).entity("Username already in use").build(); //status code 409
         } else if (!isImageValid) {
+            logger.info("User registration failed. Image URL '{}' is invalid. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    user.getPhotoURL(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(422).entity("Image URL invalid").build(); //400
         } else if (!isPhoneNumberValid) {
+            logger.info("User registration failed. Phone number '{}' is invalid. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    user.getPhone(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(422).entity("Invalid phone number").build();
         } else if (!newPassword) {
+            logger.info("User registration failed. Email was not sent. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(404).entity("Email not sent").build();
         } else if (userBean.register(user)) {
+            logger.info("User '{}' registered successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    user.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(Response.Status.CREATED).entity("User registered successfully").build(); //status code 201
         } else {
+            logger.info("User registration failed. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(Response.Status.BAD_REQUEST).entity("Something went wrong").build(); //status code 400
         }
         return response;
@@ -111,14 +152,20 @@ public class UserService {
     @GET
     @Path("/getFirstName")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getFirstName(@HeaderParam("token") String token) {
+    public Response getFirstName(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User is trying to get his first name. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User currentUser = userBean.convertEntityByToken(token);
-
+        logger.info("User '{}' got his first name successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                currentUser.getFirstName(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (!userBean.isAuthenticated(token)) {
+            logger.info("User is not authenticated to get his first name. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         } else {
+            logger.info("User '{}' got his first name successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    currentUser.getFirstName(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(200).entity(currentUser.getFirstName()).build();
         }
         return response;
@@ -128,14 +175,20 @@ public class UserService {
     @GET
     @Path("/getPhotoUrl")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getImage(@HeaderParam("token") String token) {
+    public Response getImage(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User is trying to get his photo URL. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User currentUser = userBean.convertEntityByToken(token);
-
+        logger.info("User '{}' got his photo URL successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                currentUser.getPhotoURL(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (!userBean.isAuthenticated(token)) {
+            logger.info("User is not authenticated to get his photo URL. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         } else {
+            logger.info("User '{}' got his photo URL successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    currentUser.getPhotoURL(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(200).entity(currentUser.getPhotoURL()).build();
         }
         return response;
@@ -145,14 +198,20 @@ public class UserService {
     @GET
     @Path("/getUsername")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsername(@HeaderParam("token") String token) {
+    public Response getUsername(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User is trying to get his username. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User currentUser = userBean.convertEntityByToken(token);
-
+        logger.info("User '{}' got his username successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                currentUser.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (!userBean.isAuthenticated(token)) {
+            logger.info("User is not authenticated to get his username. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         } else {
+            logger.info("User '{}' got his username successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    currentUser.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(200).entity(currentUser.getUsername()).build();
         }
         return response;
@@ -163,14 +222,20 @@ public class UserService {
     @GET
     @Path("/getTypeOfUser")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTypeOfUser(@HeaderParam("token") String token) {
+    public Response getTypeOfUser(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User is trying to get his type of user. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User currentUser = userBean.convertEntityByToken(token);
-
+        logger.info("User '{}' got his type of user successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                currentUser.getTypeOfUser(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (!userBean.isAuthenticated(token)) {
+            logger.info("User is not authenticated to get his type of user. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         } else {
+            logger.info("User '{}' got his type of user successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    currentUser.getTypeOfUser(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(200).entity(currentUser.getTypeOfUser()).build();
         }
         return response;
@@ -179,14 +244,20 @@ public class UserService {
     @GET
     @Path("/getUsernameFromEmail")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsernameFromEmail(@HeaderParam("email") String email, @HeaderParam("token") String token) {
+    public Response getUsernameFromEmail(@HeaderParam("email") String email, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User is trying to get his username from email. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User user = userBean.convertEntityByEmail(email);
-
+        logger.info("User '{}' got his username from email successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (!userBean.isAuthenticated(token)) {
+            logger.info("User is not authenticated to get his username from email. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         } else {
+            logger.info("User '{}' got his username from email successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    user.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(200).entity(user.getUsername()).build();
         }
         return response;
@@ -197,32 +268,43 @@ public class UserService {
     @Path("/update/{username}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(@PathParam("username") String username, @HeaderParam("token") String token, User user) {
-        System.out.println("****************** USER " + user);
+    public Response updateUser(@PathParam("username") String username, @HeaderParam("token") String token, User user, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User '{}' is trying to update his information. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User userUpdate = userBean.getUser(username);
-
+        logger.info("User '{}' got his information successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                userUpdate, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userUpdate == null) {
+            logger.info("User '{}' is not found. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             return response;
         }
-
         if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token) || userBean.thisTokenIsFromThisUsername(token, username)) {
+            logger.info("User '{}' is authenticated and is a Product Owner. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (!userBean.isEmailUpdatedValid(user) && user.getEmail() != null) {
+                logger.info("User '{}' email is invalid. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(422).entity("Invalid email").build();
-
             } else if (!userBean.isImageUrlUpdatedValid(user.getPhotoURL()) && user.getPhotoURL() != null) {
+                logger.info("User '{}' image URL is invalid. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(422).entity("Image URL invalid").build();
-
             } else if (!userBean.isPhoneNumberUpdatedValid(user) && user.getPhone() != null) {
+                logger.info("User '{}' phone number is invalid. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(422).entity("Invalid phone number").build();
-
             } else {
+                logger.info("User '{}' information was updated successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 boolean updatedUser = userBean.updateUser(user, username);
-                response = Response.status(Response.Status.OK).entity(updatedUser).build(); //status code 200
+                response = Response.status(Response.Status.OK).entity(updatedUser).build();
             }
         } else {
+            logger.info("User '{}' is not authenticated or is not a Product Owner. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
@@ -235,63 +317,105 @@ public class UserService {
     public Response updatePassword(@PathParam("username") String username,
                                    @HeaderParam("token") String token,
                                    @HeaderParam("oldpassword") String oldPassword,
-                                   @HeaderParam("newpassword") String newPassword) {
-
-        //Verica se user está autentificado
+                                   @HeaderParam("newpassword") String newPassword, @Context HttpServletRequest request) {
+        logger.info("User '{}' is trying to update his password. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
-            // Verificar password antiga
+            logger.info("User '{}' is authenticated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             boolean isOldPasswordValid = userBean.verifyOldPassword(username, oldPassword);
             if (!isOldPasswordValid) {
+                logger.info("User '{}' old password is incorrect. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 return Response.status(401).entity("Incorrect old password").build();
             }
-            // Se a password antiga é válida, update a password
+            logger.info("User '{}' old password is correct. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             boolean updated = userBean.updatePassword(username, newPassword);
             if (!updated) {
+                logger.info("User '{}' password was not updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 return Response.status(400).entity("User with this username is not found").build();
-            } else return Response.status(200).entity("User password updated").build();
+            } else
+                logger.info("User '{}' password was updated successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+            return Response.status(200).entity("User password updated").build();
         } else
-            return Response.status(401).entity("User is not logged in").build();
+            logger.info("User '{}' is not authenticated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+        return Response.status(401).entity("User is not logged in").build();
     }
 
     @PUT
     @Path("/{username}/password")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updatePassword(@PathParam("username") String username,
-                                   @HeaderParam("newpassword") String newPassword) {
+                                   @HeaderParam("newpassword") String newPassword, @Context HttpServletRequest request) {
+        logger.info("User '{}' is trying to update his password. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User user = userBean.getUser(username);
-        System.out.println("user" + user);
+        logger.info("User '{}' got his information successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (user == null) {
+            logger.info("User '{}' is not found. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             return Response.status(404).entity("User with this username is not found").build();
         }
         long expirationTime = user.getExpirationTime();
+        logger.info("User '{}' expiration time is: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, expirationTime, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         long currentTime = System.currentTimeMillis();
-        System.out.println("Expiration time: " + expirationTime);
-        System.out.println("Current time: " + currentTime);
+        logger.info("User '{}' current time is: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, currentTime, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (expirationTime != 0 && currentTime > expirationTime) {
+            logger.info("User '{}' link expired. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             user.setExpirationTime(0);
+            logger.info("User '{}' expiration time is now: 0. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             return Response.status(401).entity("Link expired").build();
         }
+        logger.info("User '{}' link is not expired. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         boolean updated = userBean.updatePassword(user.getUsername(), newPassword);
         if (!updated) {
+            logger.info("User '{}' password was not updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             return Response.status(400).entity("User with this username is not found").build();
-        } else return Response.status(200).entity("Password updated").build();
+        } else
+            logger.info("User '{}' password was updated successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+        return Response.status(200).entity("Password updated").build();
     }
 
     @POST
     @Path("/recover-password")
     @Produces(MediaType.TEXT_PLAIN)
-    public Response sendRecoverPasswordEmail(@HeaderParam("email") String email) {
-        // Verifica se email é igual ao email de algum user que exista na base de dados
+    public Response sendRecoverPasswordEmail(@HeaderParam("email") String email, @Context HttpServletRequest request) {
+        logger.info("User is trying to recover his password. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User user = userBean.getUserByEmail(email);
+        logger.info("User '{}' got his information successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (user == null) {
+            logger.info("User with email '{}' not found. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    email, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             return Response.status(404).entity("User with this email not found").build();
         }
         long expirationTime = System.currentTimeMillis() + 2 * 60 * 1000; // 2 minutos em milissegundos
+        logger.info("User '{}' expiration time is: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user, expirationTime, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         user.setExpirationTime(expirationTime);
         boolean newEmailNemPassword = emailBean.sendPasswordResetEmail(user);
+        logger.info("Email was sent to '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getEmail(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (!newEmailNemPassword) {
+            logger.info("Email was not sent to '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    user.getEmail(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             return Response.status(404).entity("Email not sent").build();
         }
+        logger.info("Email was sent to '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user.getEmail(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         return Response.status(200).entity("Email sent").build();
     }
 
@@ -299,25 +423,45 @@ public class UserService {
     @Path("/{username}/reset-password")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response resetPassword(@PathParam("username") String username,
-                                  @HeaderParam("newpassword") String newPassword) {
+                                  @HeaderParam("newpassword") String newPassword, @Context HttpServletRequest request) {
+        logger.info("User '{}' is trying to reset his password. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User user = userBean.getUser(username);
-        System.out.println("user" + user);
+        logger.info("User '{}' got his information successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (user == null) {
+            logger.info("User with username '{}' not found. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             return Response.status(404).entity("User with this username is not found").build();
         } else if (!user.isConfirmed()) {
+            logger.info("User '{}' is not confirmed. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             return Response.status(401).entity("User is not confirmed").build();
         }
         long expirationTime = user.getExpirationTime();
+        logger.info("User '{}' expiration time is: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user, expirationTime, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         long currentTime = System.currentTimeMillis();
-
+        logger.info("User '{}' current time is: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user, currentTime, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (expirationTime != 0 && currentTime > expirationTime) {
+            logger.info("User '{}' link expired. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             user.setExpirationTime(0);
+            logger.info("User '{}' expiration time is now: 0. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             return Response.status(401).entity("Link expired").build();
         }
+        logger.info("User '{}' link is not expired. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         boolean updated = userBean.updatePassword(user.getUsername(), newPassword);
         if (!updated) {
+            logger.info("User '{}' password was not updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             return Response.status(400).entity("User with this username is not found").build();
         }
+        logger.info("User '{}' password was updated successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         return Response.status(200).entity("Password updated").build();
     }
 
@@ -326,66 +470,83 @@ public class UserService {
     @Path("/update/{username}/visibility")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateVisibility(@PathParam("username") String username, @HeaderParam("token") String token) {
+    public Response updateVisibility(@PathParam("username") String username, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User '{}' is trying to update his visibility. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User user = userBean.getUser(username);
-
-        //Verifica se o username existe na base de dados
+        logger.info("User '{}' got his information successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                user, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (user == null) {
+            logger.info("User '{}' is not found. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             return response;
         }
-
-        //Verifica se token de quem consulta existe e se é Product Owner
+        logger.info("User '{}' is found. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
-
+            logger.info("User '{}' is authenticated and is a Product Owner. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             userBean.updateUserEntityVisibility(username);
+            logger.info("User '{}' visibility was updated successfully. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(Response.Status.OK).entity(username + " visibility: " + !user.isVisible()).build(); //status code 200
-
         } else {
+            logger.info("User '{}' is not authenticated or is not a Product Owner. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
     }
 
-    //Atualizar tipo de user
+
     @PUT
     @Path("/update/{username}/role")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateRole(@PathParam("username") String username, @HeaderParam("token") String token, @HeaderParam("typeOfUser") int typeOfUser) {
+    public Response updateRole(@PathParam("username") String username, @HeaderParam("token") String token, @HeaderParam("typeOfUser") int typeOfUser, @Context HttpServletRequest request) {
         Response response;
-
+        logger.info("User '{}' is trying to update his role. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         User user = userBean.getUser(username);
-
-        //Verifica se o username existe na base de dados
+        logger.info("User '{}' got his information successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                user, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (user == null) {
+            logger.info("User '{}' is not found. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             return response;
         }
-
-        //Verifica se token existe de quem consulta e se é Product Owner
+        logger.info("User '{}' is found. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
-
+            logger.info("User '{}' is authenticated and is a Product Owner. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             if (typeOfUser == 100 || typeOfUser == 200 || typeOfUser == 300) {
-
+                logger.info("User '{}' type of user is valid. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 boolean updatedRole = userBean.updateUserEntityRole(username, typeOfUser);
+                logger.info("User '{}' role was updated successfully. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 response = Response.status(Response.Status.OK).entity("Role updated with success").build(); //status code 200
-            } else response = Response.status(401).entity("Invalid type of User").build();
-
+            } else
+                logger.info("User '{}' type of user is invalid. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                        username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+            response = Response.status(401).entity("Invalid type of User").build();
         } else {
+            logger.info("User '{}' is not authenticated or is not a Product Owner. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                    username, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             response = Response.status(401).entity("Invalid credentials").build();
         }
-
         return response;
     }
 
-    //Apagar um user
+
     @DELETE
     @Path("/{username}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeUser(@HeaderParam("token") String token, @PathParam("username") String username) {
+    public Response removeUser(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
 
         Response response;
         if (userBean.isAuthenticated(token)) {
@@ -405,7 +566,7 @@ public class UserService {
     @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsers(@HeaderParam("token") String token) {
+    public Response getUsers(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         if (userBean.isAuthenticated(token)) {
             List<User> allUsers = userBean.getUsers();
@@ -419,7 +580,7 @@ public class UserService {
     @GET
     @Path("/all/visible/{visible}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsersByVisibility(@HeaderParam("token") String token, @PathParam("visible") boolean visible) {
+    public Response getUsersByVisibility(@HeaderParam("token") String token, @PathParam("visible") boolean visible, @Context HttpServletRequest request) {
         Response response;
         if (userBean.isAuthenticated(token) && !userBean.userIsDeveloper(token)) {
             List<User> users = userBean.getUsersByVisibility(visible);
@@ -433,7 +594,7 @@ public class UserService {
     @GET
     @Path("/all/{type}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser) {
+    public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser, @Context HttpServletRequest request) {
         Response response;
         if (userBean.isAuthenticated(token) && !userBean.userIsDeveloper(token)) {
             List<User> users = userBean.getUsersByType(typeOfUser);
@@ -447,7 +608,7 @@ public class UserService {
     @GET
     @Path("/all/{type}/{visible}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser, @PathParam("visible") boolean visible) {
+    public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser, @PathParam("visible") boolean visible, @Context HttpServletRequest request) {
         Response response;
         if (userBean.isAuthenticated(token) && !userBean.userIsDeveloper(token)) {
             List<User> users = userBean.getUsersByTypeAndVisibility(typeOfUser, visible);
@@ -461,7 +622,7 @@ public class UserService {
     @GET
     @Path("/{username}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUser(@PathParam("username") String username, @HeaderParam("token") String token) {
+    public Response getUser(@PathParam("username") String username, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
 
         User userSearched = userBean.getUser(username);
@@ -483,7 +644,7 @@ public class UserService {
     @GET
     @Path("/tasks")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllTasks(@HeaderParam("token") String token) {
+    public Response getAllTasks(@HeaderParam("token") String token, @Context HttpServletRequest request) {
 
         Response response;
 
@@ -499,7 +660,7 @@ public class UserService {
     @GET
     @Path("/{username}/tasks")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllTasksFromUser(@HeaderParam("token") String token, @PathParam("username") String username) {
+    public Response getAllTasksFromUser(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
 
         Response response;
 
@@ -520,7 +681,7 @@ public class UserService {
     @Path("/{username}/addTask")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response newTask(@HeaderParam("token") String token, @PathParam("username") String username, Task task) {
+    public Response newTask(@HeaderParam("token") String token, @PathParam("username") String username, Task task, @Context HttpServletRequest request) {
         Response response;
 
         if (userBean.isAuthenticated(token)) {
@@ -548,7 +709,7 @@ public class UserService {
     @PUT
     @Path("/updatetask/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateTask(@HeaderParam("token") String token, @PathParam("id") String id, Task task) {
+    public Response updateTask(@HeaderParam("token") String token, @PathParam("id") String id, Task task, @Context HttpServletRequest request) {
 
         Response response;
         if (userBean.isAuthenticated(token)) {
@@ -574,7 +735,7 @@ public class UserService {
     @PUT
     @Path("/tasks/{taskId}/{newStateId}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateTaskStatus(@HeaderParam("token") String token, @PathParam("taskId") String taskId, @PathParam("newStateId") int stateId) {
+    public Response updateTaskStatus(@HeaderParam("token") String token, @PathParam("taskId") String taskId, @PathParam("newStateId") int stateId, @Context HttpServletRequest request) {
 
         Response response;
         if (userBean.isAuthenticated(token)) {
@@ -593,7 +754,7 @@ public class UserService {
     @PUT
     @Path("/{taskId}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response eraseTask(@HeaderParam("token") String token, @PathParam("taskId") String id) {
+    public Response eraseTask(@HeaderParam("token") String token, @PathParam("taskId") String id, @Context HttpServletRequest request) {
 
         Response response;
         if (userBean.isAuthenticated(token)) {
@@ -620,7 +781,7 @@ public class UserService {
     @PUT
     @Path("/eraseAllTasks/{username}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response eraseAllTasksFromUser(@HeaderParam("token") String token, @PathParam("username") String username) {
+    public Response eraseAllTasksFromUser(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
 
         Response response;
         if (userBean.isAuthenticated(token)) {
@@ -647,7 +808,7 @@ public class UserService {
     @DELETE
     @Path("/delete/{taskId}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteTask(@HeaderParam("token") String token, @PathParam("taskId") String id) {
+    public Response deleteTask(@HeaderParam("token") String token, @PathParam("taskId") String id, @Context HttpServletRequest request) {
 
         Response response;
         if (userBean.isAuthenticated(token)) {
@@ -674,7 +835,7 @@ public class UserService {
     @GET
     @Path("/tasks/{category}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTasksByCategory(@HeaderParam("token") String token, @PathParam("category") String category) {
+    public Response getTasksByCategory(@HeaderParam("token") String token, @PathParam("category") String category, @Context HttpServletRequest request) {
 
         Response response;
         if (userBean.isAuthenticated(token)) {
@@ -693,7 +854,7 @@ public class UserService {
     @GET
     @Path("/erasedTasks")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getErasedTasks(@HeaderParam("token") String token) {
+    public Response getErasedTasks(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         if (userBean.isAuthenticated(token)) {
             if (userBean.userIsScrumMaster(token) || userBean.userIsProductOwner(token)) {
@@ -711,7 +872,7 @@ public class UserService {
     @POST
     @Path("/newCategory")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response newCategory(@HeaderParam("token") String token, Category category) {
+    public Response newCategory(@HeaderParam("token") String token, Category category, @Context HttpServletRequest request) {
 
         Response response;
 
@@ -743,7 +904,7 @@ public class UserService {
     @DELETE
     @Path("/deleteCategory/{categoryName}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteCategory(@HeaderParam("token") String token, @PathParam("categoryName") String categoryName) {
+    public Response deleteCategory(@HeaderParam("token") String token, @PathParam("categoryName") String categoryName, @Context HttpServletRequest request) {
         System.out.println("********************** CATEGORY NAME " + categoryName);
         Response response;
 
@@ -771,7 +932,7 @@ public class UserService {
     @PUT
     @Path("/editCategory/{categoryName}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response editCategory(@HeaderParam("token") String token, @PathParam("categoryName") String categoryName, @HeaderParam("newCategoryName") String newCategoryName) {
+    public Response editCategory(@HeaderParam("token") String token, @PathParam("categoryName") String categoryName, @HeaderParam("newCategoryName") String newCategoryName, @Context HttpServletRequest request) {
 
         Response response;
 
@@ -801,7 +962,7 @@ public class UserService {
     @GET
     @Path("/categories")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllCategories(@HeaderParam("token") String token) {
+    public Response getAllCategories(@HeaderParam("token") String token, @Context HttpServletRequest request) {
 
         Response response;
 
@@ -822,7 +983,7 @@ public class UserService {
     @GET
     @Path("/stats")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllStats(@HeaderParam("token") String token) {
+    public Response getAllStats(@HeaderParam("token") String token, @Context HttpServletRequest request) {
 
         Response response;
 
@@ -859,7 +1020,7 @@ public class UserService {
     @GET
     @Path("/{username}/stats")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserStats(@HeaderParam("token") String token, @PathParam("username") String username) {
+    public Response getUserStats(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
 
         Response response;
 
@@ -884,7 +1045,7 @@ public class UserService {
     @GET
     @Path("/getAllMessagesBetweenUsers/{usernameReceiver}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllMessagesBetweenUsers(@HeaderParam("token") String token, @PathParam("usernameReceiver") String usernameReceiver) {
+    public Response getAllMessagesBetweenUsers(@HeaderParam("token") String token, @PathParam("usernameReceiver") String usernameReceiver, @Context HttpServletRequest request) {
         Response response;
         if (userBean.isAuthenticated(token)) {
             UserEntity userSender = userDao.findUserByToken(token);
@@ -901,7 +1062,7 @@ public class UserService {
     @GET
     @Path("/getAllNotifications")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllUnreadNotifications(@HeaderParam("token") String token) {
+    public Response getAllUnreadNotifications(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         if (userBean.isAuthenticated(token)) {
             UserEntity userReceiver = userDao.findUserByToken(token);
@@ -919,7 +1080,7 @@ public class UserService {
     @Path("/markNotificationsAsRead/{senderUsername}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response markNotificationsAsRead(@HeaderParam("token") String token, @PathParam("senderUsername") String senderUsername) {
+    public Response markNotificationsAsRead(@HeaderParam("token") String token, @PathParam("senderUsername") String senderUsername, @Context HttpServletRequest request) {
         Response response;
         if (userBean.isAuthenticated(token)) {
             UserEntity userReceiver = userDao.findUserByToken(token);
