@@ -19,9 +19,15 @@ import java.time.LocalDateTime;
 @NamedQuery(name = "ChatMessage.findLatestChatMessage", query = "SELECT c FROM ChatMessageEntity c WHERE (c.sender.username = :sender " +
         "AND c.receiver.username = :receiver) AND c.sentAt = (SELECT MAX(c.sentAt) FROM ChatMessageEntity c WHERE (c.sender.username = :sender " +
         "AND c.receiver.username = :receiver))")
+@NamedQuery(name = "ChatMessage.findAllChatMessagesBetweenUsersReceiverIsUser", query = "SELECT c FROM ChatMessageEntity c WHERE c.receiver.username = :receiver " +
+        "AND c.sender.username = :sender AND c.isRead = false")
+@NamedQuery(name = "ChatMessage.findLatestChatMessageToMarkAsDelivered", query = "SELECT c FROM ChatMessageEntity c WHERE (c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver) AND c.sentAt = (SELECT MAX(c.sentAt) FROM ChatMessageEntity c WHERE (c.sender.username = :sender " +
+        "AND c.receiver.username = :receiver))")
 public class ChatMessageEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,14 +50,14 @@ public class ChatMessageEntity implements Serializable {
     @Column(name = "is_read")
     private boolean isRead;
 
-    @Column
+    @Column(name = "delivered")
     private boolean delivered;
 
 
     public ChatMessageEntity() {
     }
 
-    public ChatMessageEntity(UserEntity sender, UserEntity receiver, String message, LocalDateTime sentAt, boolean isRead) {
+    public ChatMessageEntity(UserEntity sender, UserEntity receiver, String message, LocalDateTime sentAt, boolean isRead, boolean delivered) {
         this.sender = sender;
         this.receiver = receiver;
         this.message = message;
@@ -78,15 +84,15 @@ public class ChatMessageEntity implements Serializable {
     public UserEntity getSender() {
         return sender;
     }
-    
+
     public void setSender(UserEntity sender) {
         this.sender = sender;
     }
-    
+
     public UserEntity getReceiver() {
         return receiver;
     }
-    
+
     public void setReceiver(UserEntity receiver) {
         this.receiver = receiver;
     }

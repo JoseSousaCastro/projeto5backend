@@ -14,6 +14,7 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import project5.websocket.WSDashboard;
 import project5.websocket.WSTasks;
+import org.apache.logging.log4j.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -38,6 +39,8 @@ public class TaskBean implements Serializable {
     private WSDashboard wsDashboard;
     @EJB
     private WSTasks wsTasks;
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LogManager.getLogger(TaskBean.class);
 
@@ -143,11 +146,10 @@ public class TaskBean implements Serializable {
     }
 
 
-
     public boolean switchErasedTaskStatus(String id) {
         boolean swithedErased = false;
         TaskEntity taskEntity = taskDao.findTaskById(id);
-        if(taskEntity != null) {
+        if (taskEntity != null) {
             taskEntity.setErased(!taskEntity.getErased());
             taskDao.merge(taskEntity);
             swithedErased = true;
@@ -187,7 +189,7 @@ public class TaskBean implements Serializable {
         boolean valid = true;
         if ((task.getStartDate() == null
                 || task.getLimitDate() == null
-              //  || task.getLimitDate().isBefore(task.getStartDate())
+                //  || task.getLimitDate().isBefore(task.getStartDate())
                 || task.getTitle().isBlank()
                 || task.getDescription().isBlank()
                 || task.getOwner() == null

@@ -6,11 +6,14 @@ import project5.entity.ChatMessageEntity;
 
 import java.util.ArrayList;
 
+import org.apache.logging.log4j.*;
 
 @Stateless
 public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(ChatMessageDao.class);
 
     public ChatMessageDao() {
         super(ChatMessageEntity.class);
@@ -107,6 +110,28 @@ public class ChatMessageDao extends AbstractDao<ChatMessageEntity> {
             em.merge(messageEntity);
         } else {
             System.out.println("Error: messageEntity is null");
+        }
+    }
+
+    public ArrayList<ChatMessageEntity> findAllChatMessagesBetweenUsersReceiverIsUser(String usernameSender, String usernameReceiver) {
+        try {
+            return new ArrayList<>(em.createNamedQuery("ChatMessage.findAllChatMessagesBetweenUsersReceiverIsUser", ChatMessageEntity.class)
+                    .setParameter("receiver", usernameSender)
+                    .setParameter("sender", usernameReceiver)
+                    .getResultList());
+        } catch (NoResultException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    public ChatMessageEntity findLatestChatMessageToMarkAsDelivered(String senderUsername, String receiverUsername) {
+        try {
+            return (ChatMessageEntity) em.createNamedQuery("ChatMessage.findLatestChatMessageToMarkAsDelivered")
+                    .setParameter("sender", senderUsername)
+                    .setParameter("receiver", receiverUsername)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
         }
     }
 }

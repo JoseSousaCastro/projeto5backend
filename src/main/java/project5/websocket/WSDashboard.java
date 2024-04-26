@@ -13,6 +13,8 @@ import project5.entity.UserEntity;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.*;
+
 @Singleton
 @ServerEndpoint("/websocket/dashboard/{token}")
 public class WSDashboard {
@@ -21,9 +23,12 @@ public class WSDashboard {
 
     @Inject
     private ChatBean chatBean;
-
     @EJB
     private UserDao userDao;
+
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(WSDashboard.class);
 
     public void send(String msg) {
         for (Session session : sessions.values()) {

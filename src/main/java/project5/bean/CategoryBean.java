@@ -10,12 +10,18 @@ import project5.websocket.WSDashboard;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.apache.logging.log4j.*;
+
 @Stateless
 public class CategoryBean implements Serializable {
     @EJB
     private CategoryDao categoryDao;
     @EJB
     private WSDashboard wsDashboard;
+
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(CategoryBean.class);
 
     public boolean newCategory(String name) {
         boolean created = false;

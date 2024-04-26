@@ -15,6 +15,8 @@ import project5.entity.UserEntity;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.*;
+
 @Singleton
 @ServerEndpoint("/websocket/chat/{token}/{receiver}")
 public class WSChat {
@@ -23,15 +25,18 @@ public class WSChat {
 
     @Inject
     private ChatBean chatBean;
-
     @EJB
     private UserDao userDao;
-
     @EJB
     WSNotifications WSNotifications;
 
-    public void send(String token, String msg) {
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(WSChat.class);
+
+    public void send(String receiverUsername, String senderUsername, String token) {
         Session session = sessions.get(token);
+        String msg = "All messages and notifications from " + receiverUsername + " to " + senderUsername + " are read";
         if (session != null) {
             System.out.println("sending from WSCHat.......... " + msg);
             try {
@@ -50,7 +55,9 @@ public class WSChat {
         String conversationID = senderUsername + receiverUsername;
         System.out.println("Conversation ID from WSCHat: " + conversationID);
         sessions.put(conversationID, session);
-        chatBean.markAllChatMessagesAsRead(senderUsername);
+        chatBean.markAllChatMessagesAsReadAndDelivered(senderUsername);
+        chatBean.setNotificationsAsReadFromSenderToUser(senderUsername, receiverUsername);
+        send(receiverUsername, senderUsername, token);
     }
 
     @OnClose
@@ -79,6 +86,9 @@ public class WSChat {
             String conversationID = receiverUsername + sender.getUsername();
             Session receiverSession = sessions.get(conversationID);
 
+            String conversationID2 = sender.getUsername() + receiverUsername;
+            Session senderSession = sessions.get(conversationID2);
+
             if (receiverSession != null) {
                 System.out.println("Receiver message session found on WSCHat. Sending message to receiver on WSCHat.");
                 ChatMessage chatMessage = chatBean.findLatestChatMessage(sender.getUsername(), receiver.getUsername());
@@ -86,7 +96,7 @@ public class WSChat {
                 String jsonMessage = chatBean.convertChatMessageToJSON(chatMessage);
                 try {
                     receiverSession.getBasicRemote().sendText(jsonMessage);
-                    chatBean.markChatMessageAsRead(chatMessage.getId());
+                    send(receiverUsername, sender.getUsername(), token);
                 } catch (IOException e) {
                     System.out.println("Something went wrong during onMessage sending back the message on WSCHat!");
                 }

@@ -42,6 +42,9 @@ public class Task {
     @XmlElement
     public LocalDate doneDate;
 
+    private static final long serialVersionUID = 1L;
+
+
     public Task() {
     }
 
@@ -199,12 +202,12 @@ public class Task {
         return "";
     }
 
-public int getDoneYear() {
-    if (doneDate != null) {
-        return doneDate.getYear();
-    } else {
-        return 0; // Ou outra indicação de que a data de conclusão não está definida
+    public int getDoneYear() {
+        if (doneDate != null) {
+            return doneDate.getYear();
+        } else {
+            return 0; // Ou outra indicação de que a data de conclusão não está definida
+        }
     }
-}
 
 }

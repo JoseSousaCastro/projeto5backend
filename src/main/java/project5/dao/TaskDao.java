@@ -8,10 +8,14 @@ import project5.entity.UserEntity;
 
 import java.util.ArrayList;
 
+import org.apache.logging.log4j.*;
+
 @Stateless
 public class TaskDao extends AbstractDao<TaskEntity> {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(TaskDao.class);
 
     public TaskDao() {
         super(TaskEntity.class);
@@ -126,11 +130,6 @@ public class TaskDao extends AbstractDao<TaskEntity> {
             return null;
         }
     }
-
-
-
-
-
 
 
     public ArrayList<CategoryEntity> getCategoriesFromMostFrequentToLeastFrequent() {

@@ -1,5 +1,7 @@
 package project5.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 import project5.bean.*;
 import project5.dao.UserDao;
 import project5.dto.*;
@@ -7,13 +9,13 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import project5.entity.ChatMessageEntity;
 import project5.entity.UserEntity;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import org.apache.logging.log4j.*;
 
 @Path("/users")
 public class UserService {
@@ -33,20 +35,23 @@ public class UserService {
     @Inject
     ChatBean chatBean;
 
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(UserService.class);
+
 
     @POST
     @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response login(Login login) {
+    public Response login(Login login, @Context HttpServletRequest request) {
 
         LoggedUser loggedUser = userBean.login(login);
-        System.out.println("Confirmed: " + loggedUser.isConfirmed());
-        System.out.println("Creation date: " + loggedUser.getCreationDate());
         Response response;
 
         if (loggedUser != null) {
             response = Response.status(200).entity(loggedUser).build();
+            logger.info("User '{}' logged in. Author: '{}' , IP: '{}'", loggedUser.getUsername(), request.getRemoteUser(), request.getRemoteAddr());
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
@@ -885,6 +890,7 @@ public class UserService {
             UserEntity userSender = userDao.findUserByToken(token);
             String usernameSender = userSender.getUsername();
             ArrayList<ChatMessage> messages = chatBean.getAllChatMessagesBetweenUsers(usernameSender, usernameReceiver);
+            chatBean.setMessagesAsReadFromSenderToUser(usernameSender, usernameReceiver);
             response = Response.status(200).entity(messages).build();
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
@@ -893,15 +899,36 @@ public class UserService {
     }
 
     @GET
-    @Path("/getALlUnreadNotifications")
+    @Path("/getAllNotifications")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllUnreadNotifications (@HeaderParam("token") String token) {
+    public Response getAllUnreadNotifications(@HeaderParam("token") String token) {
         Response response;
         if (userBean.isAuthenticated(token)) {
             UserEntity userReceiver = userDao.findUserByToken(token);
             String usernameReceiver = userReceiver.getUsername();
-            Map<String, Integer> unreadNotificationCounts = chatBean.countUnreadNotificationsBySender(chatBean.getAllNotificationsByReceiver(usernameReceiver));
-            response = Response.status(200).entity(unreadNotificationCounts).build();
+            ArrayList<ChatNotification> notifications = chatBean.getAllNotificationsByReceiver(usernameReceiver);
+            System.out.println("Notifications: " + notifications);
+            response = Response.status(200).entity(notifications).build();
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
+
+    @PUT
+    @Path("/markNotificationsAsRead/{senderUsername}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response markNotificationsAsRead(@HeaderParam("token") String token, @PathParam("senderUsername") String senderUsername) {
+        Response response;
+        if (userBean.isAuthenticated(token)) {
+            UserEntity userReceiver = userDao.findUserByToken(token);
+            System.out.println("User receiver: " + userReceiver.getUsername());
+            System.out.println("User sender: " + senderUsername);
+            String usernameReceiver = userReceiver.getUsername();
+            chatBean.setNotificationsAsReadFromSenderToUser(usernameReceiver, senderUsername);
+            System.out.println("Notifications marked as read");
+            response = Response.status(200).entity("Notifications marked as read").build();
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }

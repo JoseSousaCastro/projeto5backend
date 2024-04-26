@@ -9,7 +9,6 @@ import project5.dto.Category;
 import project5.dto.RegistInfoCategory;
 import project5.dto.RegistInfoTask;
 import project5.dto.RegistInfoUser;
-import project5.entity.CategoryEntity;
 import project5.entity.TaskEntity;
 import project5.entity.UserEntity;
 
@@ -17,6 +16,8 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import org.apache.logging.log4j.*;
 
 @Stateless
 public class StatsBean implements Serializable {
@@ -33,6 +34,10 @@ public class StatsBean implements Serializable {
     private CategoryBean categoryBean;
     @EJB
     private TaskBean taskBean;
+
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(StatsBean.class);
 
 
     // Users Stats

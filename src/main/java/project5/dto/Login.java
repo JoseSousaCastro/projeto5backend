@@ -11,7 +11,11 @@ public class Login {
     @XmlElement
     String password;
 
-    public Login() {}
+    private static final long serialVersionUID = 1L;
+
+
+    public Login() {
+    }
 
     public String getUsername() {
         return username;

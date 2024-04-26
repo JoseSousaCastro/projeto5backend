@@ -1,67 +1,70 @@
 package project5.entity;
 
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import org.hibernate.annotations.CreationTimestamp;
-import jakarta.persistence.*;
 
 @Entity
-@Table(name="task")
-@NamedQuery(name="Task.findTaskById", query="SELECT a FROM TaskEntity a WHERE a.id = :id")// os : significam que, neste caso o id é um parametro/atributo
-@NamedQuery(name="Task.findTasksByUser", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.findTasksNotDeletedNorErasedByUser", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.findTasksByCategory", query="SELECT a FROM TaskEntity a WHERE a.category = :category ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.findErasedTasks", query="SELECT a FROM TaskEntity a WHERE a.erased = true ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.findAllTasks", query="SELECT a FROM TaskEntity a ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="DeleteTask", query="DELETE FROM TaskEntity a WHERE a.id = :id")
-@NamedQuery(name="Task.findTasksByUserAndStateId", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.findTasksNotDeletedeNorErsasedByUserAndStateId", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.erased = false AND a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.findAllTasksByStateId", query="SELECT a FROM TaskEntity a WHERE a.stateId = :stateId AND a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.findAllTasksNotErased", query="SELECT a FROM TaskEntity a WHERE a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.findAllCompletedTasks", query="SELECT a FROM TaskEntity a WHERE a.stateId = 300 AND a.erased = false ORDER BY a.doneDate DESC")
+@Table(name = "task")
+@NamedQuery(name = "Task.findTaskById", query = "SELECT a FROM TaskEntity a WHERE a.id = :id")
+// os : significam que, neste caso o id é um parametro/atributo
+@NamedQuery(name = "Task.findTasksByUser", query = "SELECT a FROM TaskEntity a WHERE a.owner = :owner ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name = "Task.findTasksNotDeletedNorErasedByUser", query = "SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name = "Task.findTasksByCategory", query = "SELECT a FROM TaskEntity a WHERE a.category = :category ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name = "Task.findErasedTasks", query = "SELECT a FROM TaskEntity a WHERE a.erased = true ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name = "Task.findAllTasks", query = "SELECT a FROM TaskEntity a ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name = "DeleteTask", query = "DELETE FROM TaskEntity a WHERE a.id = :id")
+@NamedQuery(name = "Task.findTasksByUserAndStateId", query = "SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name = "Task.findTasksNotDeletedeNorErsasedByUserAndStateId", query = "SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.erased = false AND a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name = "Task.findAllTasksByStateId", query = "SELECT a FROM TaskEntity a WHERE a.stateId = :stateId AND a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name = "Task.findAllTasksNotErased", query = "SELECT a FROM TaskEntity a WHERE a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name = "Task.findAllCompletedTasks", query = "SELECT a FROM TaskEntity a WHERE a.stateId = 300 AND a.erased = false ORDER BY a.doneDate DESC")
 
-@NamedQuery(name="Task.findTasksCompletedOnDate", query="SELECT a FROM TaskEntity a WHERE a.doneDate = :doneDate AND a.stateId = 300 AND a.erased = false AND a.id = :id")
-@NamedQuery(name="Task.getCategoriesFromMostFrequentToLeastFrequent", query="SELECT a.category, COUNT(a.category) FROM TaskEntity a WHERE a.erased = false GROUP BY a.category ORDER BY COUNT(a.category) DESC")
-public class TaskEntity implements Serializable{
+@NamedQuery(name = "Task.findTasksCompletedOnDate", query = "SELECT a FROM TaskEntity a WHERE a.doneDate = :doneDate AND a.stateId = 300 AND a.erased = false AND a.id = :id")
+@NamedQuery(name = "Task.getCategoriesFromMostFrequentToLeastFrequent", query = "SELECT a.category, COUNT(a.category) FROM TaskEntity a WHERE a.erased = false GROUP BY a.category ORDER BY COUNT(a.category) DESC")
+public class TaskEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+
     @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column (name="id", nullable = false, unique = true, updatable = false)
+    @Column(name = "id", nullable = false, unique = true, updatable = false)
     private String id;
 
-    @Column (name="title", nullable = false, unique = false, length = 100)
+    @Column(name = "title", nullable = false, unique = false, length = 100)
     private String title;
 
-    @Column (name="description", nullable = false, unique = false, length = 20000, columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false, unique = false, length = 20000, columnDefinition = "TEXT")
     private String description;
 
-    @Column (name="stateId", nullable = false, unique = false, updatable = true)
+    @Column(name = "stateId", nullable = false, unique = false, updatable = true)
     private int stateId;
 
-    @Column (name="priority", nullable = false, unique = false, updatable = true)
+    @Column(name = "priority", nullable = false, unique = false, updatable = true)
     private int priority;
 
     @CreationTimestamp
-    @Column (name="creation_date", nullable = false, unique = false, updatable = false)
+    @Column(name = "creation_date", nullable = false, unique = false, updatable = false)
     private Timestamp creationDate;
 
-    @Column (name="startDate", nullable = false, unique = false, updatable = true)
+    @Column(name = "startDate", nullable = false, unique = false, updatable = true)
     private LocalDate startDate;
 
-    @Column (name="limitDate", nullable = false, unique = false, updatable = true)
+    @Column(name = "limitDate", nullable = false, unique = false, updatable = true)
     private LocalDate limitDate;
 
-    @Column (name="doneDate", nullable = true, unique = false, updatable = true)
+    @Column(name = "doneDate", nullable = true, unique = false, updatable = true)
     private LocalDate doneDate;
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private CategoryEntity category;
 
-    @Column (name="erased", nullable = false, unique = false, updatable = true)
+    @Column(name = "erased", nullable = false, unique = false, updatable = true)
     private boolean erased;
 
     //Owning Side User - task
@@ -74,23 +77,19 @@ public class TaskEntity implements Serializable{
 
     }
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setId(String id)
-    {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public Timestamp getCreationDate()
-    {
+    public Timestamp getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Timestamp creationDate)
-    {
+    public void setCreationDate(Timestamp creationDate) {
         this.creationDate = creationDate;
     }
 

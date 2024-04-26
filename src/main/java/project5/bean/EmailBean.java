@@ -8,6 +8,9 @@ import project5.dto.User;
 
 import java.util.Properties;
 
+import org.apache.logging.log4j.*;
+
+
 @Stateless
 public class EmailBean {
     @EJB
@@ -16,6 +19,11 @@ public class EmailBean {
     private final String password = "xktz ownn favj ldum"; // Sua senha de e-mail
     private final String host = "smtp.gmail.com";
     private final String port = "587";
+
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(EmailBean.class);
+
 
     public EmailBean() {
     }

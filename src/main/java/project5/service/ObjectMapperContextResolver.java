@@ -1,4 +1,4 @@
-package aor.paj.service;
+package project5.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -10,6 +10,9 @@ import jakarta.ws.rs.ext.Provider;
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper mapper;
+
+    private static final long serialVersionUID = 1L;
+
 
     public ObjectMapperContextResolver() {
         mapper = new ObjectMapper();

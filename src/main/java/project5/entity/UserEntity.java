@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 @Entity
-@Table(name="user")
+@Table(name = "user")
 @NamedQuery(name = "User.findAllUsers", query = "SELECT u FROM UserEntity u WHERE u.username NOT IN ('admin', 'NOTASSIGNED')")
 @NamedQuery(name = "User.findAllUsersByTypeOfUser", query = "SELECT u FROM UserEntity u WHERE u.typeOfUser = :typeOfUser AND u.username NOT IN ('admin', 'NOTASSIGNED')")
 @NamedQuery(name = "User.findAllUsersByVisibility", query = "SELECT u FROM UserEntity u WHERE u.visible = :visible AND u.username NOT IN ('admin', 'NOTASSIGNED')")
@@ -21,49 +21,49 @@ import java.util.Set;
 @NamedQuery(name = "User.findAllUsersByIsConfirmed", query = "SELECT u FROM UserEntity u WHERE u.confirmed = :confirmed AND u.username NOT IN ('admin', 'NOTASSIGNED')")
 @NamedQuery(name = "User.findAllConfirmedAndNotErasedUsers", query = "SELECT u FROM UserEntity u WHERE u.confirmed = true AND u.visible = true AND u.username NOT IN ('admin', 'NOTASSIGNED')")
 @NamedQuery(name = "User.findUsersRegisteredOnDate", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.creationDate = :creationDate AND u.confirmed = true AND u.username NOT IN ('admin', 'NOTASSIGNED')")
-public class UserEntity implements Serializable{
+public class UserEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    //user unique username has ID - not updatable, unique, not null
+
     @Id
-    @Column(name="username", nullable=false, unique = true, updatable = false)
+    @Column(name = "username", nullable = false, unique = true, updatable = false)
     private String username;
 
-    @Column(name="password", nullable=true, unique = false, updatable = true)
+    @Column(name = "password", nullable = true, unique = false, updatable = true)
     private String password;
 
-    @Column(name="type_of_user", nullable=false, unique = false, updatable = true)
+    @Column(name = "type_of_user", nullable = false, unique = false, updatable = true)
     private int typeOfUser;
 
-    @Column(name="email", nullable=false, unique = true, updatable = true)
+    @Column(name = "email", nullable = false, unique = true, updatable = true)
     private String email;
 
-    @Column(name="first_name", nullable=false, unique = false, updatable = true)
+    @Column(name = "first_name", nullable = false, unique = false, updatable = true)
     private String firstName;
 
-    @Column(name="last_name", nullable=false, unique = false, updatable = true)
+    @Column(name = "last_name", nullable = false, unique = false, updatable = true)
     private String lastName;
 
-    @Column(name="phone", nullable=false, unique = true, updatable = true)
+    @Column(name = "phone", nullable = false, unique = true, updatable = true)
     private String phone;
 
-    @Column(name="photo_url", nullable=false, unique = false, updatable = true)
+    @Column(name = "photo_url", nullable = false, unique = false, updatable = true)
     private String photoURL;
 
-    @Column(name="token", nullable=true, unique = true, updatable = true)
+    @Column(name = "token", nullable = true, unique = true, updatable = true)
     private String token;
 
-    @Column(name="visible", nullable = false, unique = false, updatable = true)
+    @Column(name = "visible", nullable = false, unique = false, updatable = true)
     private boolean visible;
 
-    @Column(name="expiration_time", nullable = true, unique = false, updatable = true)
+    @Column(name = "expiration_time", nullable = true, unique = false, updatable = true)
     private long expirationTime;
 
-    @Column(name="confirmed", nullable = false, unique = false, updatable = true)
+    @Column(name = "confirmed", nullable = false, unique = false, updatable = true)
     private boolean confirmed;
 
-    @Column(name="creation_date", nullable = false, unique = false, updatable = true)
+    @Column(name = "creation_date", nullable = false, unique = false, updatable = true)
     private LocalDate creationDate;
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -71,7 +71,8 @@ public class UserEntity implements Serializable{
 
 
     //default empty constructor
-    public UserEntity() {}
+    public UserEntity() {
+    }
 
     public String getUsername() {
         return username;
@@ -153,19 +154,26 @@ public class UserEntity implements Serializable{
         this.token = token;
     }
 
-    public boolean isVisible() {return visible;}
+    public boolean isVisible() {
+        return visible;
+    }
 
-    public void setVisible(boolean visivel) {this.visible = visivel;}
+    public void setVisible(boolean visivel) {
+        this.visible = visivel;
+    }
 
     public long getExpirationTime() {
         return expirationTime;
     }
+
     public void setExpirationTime(long expirationTime) {
         this.expirationTime = expirationTime;
     }
+
     public boolean isConfirmed() {
         return confirmed;
     }
+
     public void setConfirmed(boolean confirmed) {
         this.confirmed = confirmed;
     }

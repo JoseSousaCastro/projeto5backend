@@ -10,6 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 public class UserManagementScheduler {
 
+    private static final long serialVersionUID = 1L;
+
+
     // Crie um executor de tarefas agendadas com uma thread
     private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -26,7 +29,7 @@ public class UserManagementScheduler {
         // Para cada usuário na lista
         for (User user : users) {
             // Se o usuário estiver expirado
-            if (user.getExpirationTime() < System.currentTimeMillis()) {
+            if (user.getExpirationTime() > System.currentTimeMillis()) {
                 // Remova o usuário
                 users.remove(user);
             }
@@ -45,9 +48,6 @@ public class UserManagementScheduler {
         UserManagementScheduler scheduler = new UserManagementScheduler();
         // Inicie o agendador
         scheduler.startScheduler();
-
-        // Mantenha a aplicação em execução
-        // Você pode adicionar outras lógicas de aplicação aqui, se necessário
 
         // Quando a aplicação for encerrada, pare o agendador
         Runtime.getRuntime().addShutdownHook(new Thread(scheduler::stopScheduler));

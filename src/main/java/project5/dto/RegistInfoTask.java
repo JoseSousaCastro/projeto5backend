@@ -12,6 +12,9 @@ public class RegistInfoTask {
     @XmlElement
     private int count;
 
+    private static final long serialVersionUID = 1L;
+
+
     public RegistInfoTask() {
         // Construtor vazio necessário para JAXB
     }

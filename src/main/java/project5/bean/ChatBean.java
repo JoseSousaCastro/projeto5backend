@@ -15,9 +15,8 @@ import project5.entity.UserEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import org.apache.logging.log4j.*;
 
 
 @Stateless
@@ -25,13 +24,14 @@ public class ChatBean {
 
     @Inject
     private ChatMessageDao messageDao;
-
     @Inject
     private ChatNotificationDao notificationDao;
-
     @Inject
     private UserDao userDao;
 
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(ChatBean.class);
 
     public ChatMessage convertChatMessageEntityToDTO(ChatMessageEntity entity) {
         ChatMessage message = new ChatMessage();
@@ -41,6 +41,7 @@ public class ChatBean {
         message.setMessage(entity.getMessage());
         message.setSentAt(entity.getSentAt());
         message.setRead(entity.isRead());
+        message.setDelivered(entity.isDelivered());
 
         return message;
     }
@@ -63,8 +64,9 @@ public class ChatBean {
         if (sender != null && receiver != null) {
             LocalDateTime sentAt = LocalDateTime.now();
             boolean isRead = false;
+            boolean delivered = false;
 
-            ChatMessageEntity newMessage = new ChatMessageEntity(sender, receiver, messageText, sentAt, isRead);
+            ChatMessageEntity newMessage = new ChatMessageEntity(sender, receiver, messageText, sentAt, isRead, delivered);
             System.out.println("Saving message: " + newMessage);
             messageDao.create(newMessage);
         } else {
@@ -80,12 +82,22 @@ public class ChatBean {
             ChatNotificationEntity newNotification = new ChatNotificationEntity(sender, receiver, messageText, sentAt, isRead);
             System.out.println("Saving notification: " + newNotification);
             notificationDao.create(newNotification);
+            findLatestChatMessageToMarkAsDelivered(sender.getUsername(), receiver.getUsername());
         } else {
             System.out.println("Sender or receiver not found. Unable to save notification.");
         }
     }
 
+    public void findLatestChatMessageToMarkAsDelivered(String senderUsername, String receiverUsername) {
+        ChatMessageEntity message = messageDao.findLatestChatMessageToMarkAsDelivered(senderUsername, receiverUsername);
+        if (message != null) {
+            message.setDelivered(true);
+            messageDao.update(message);
+        }
+    }
+
     public ChatMessage findLatestChatMessage(String senderUsername, String receiverUsername) {
+        markChatMessageAsReadAndDelivered(messageDao.findLatestChatMessage(senderUsername, receiverUsername).getId());
         return convertChatMessageEntityToDTO(messageDao.findLatestChatMessage(senderUsername, receiverUsername));
     }
 
@@ -116,36 +128,12 @@ public class ChatBean {
         return notifications;
     }
 
-    public Map<String, Integer> countUnreadNotificationsBySender(ArrayList<ChatNotification> notifications) {
-        Map<String, Integer> unreadNotificationCounts = new HashMap<>();
-
-        // Itera sobre todas as notificações
-        for (ChatNotification notification : notifications) {
-            // Verifica se a notificação não foi lida
-            if (!notification.isRead()) {
-                // Obtém o nome do remetente
-                String senderUsername = notification.getSenderUsername();
-
-                // Verifica se o remetente já tem um contador no mapa
-                if (!unreadNotificationCounts.containsKey(senderUsername)) {
-                    // Se não houver, inicia o contador em 1
-                    unreadNotificationCounts.put(senderUsername, 1);
-                } else {
-                    // Se já houver, incrementa o contador existente
-                    unreadNotificationCounts.put(senderUsername, unreadNotificationCounts.get(senderUsername) + 1);
-                }
-            }
-        }
-        // Retorna o mapa com o número de notificações não lidas por remetente
-        return unreadNotificationCounts;
-    }
-
 
     public int countUnreadNotifications(String receiverUsername) {
         return notificationDao.countAllChatNotificationsNotRead(receiverUsername);
     }
 
-    public void markChatMessageAsRead(Long messageId) {
+    public void markChatMessageAsReadAndDelivered(Long messageId) {
         ChatMessageEntity message = messageDao.findChatMessageById(messageId);
         if (message != null && !message.isRead()) {
             message.setRead(true);
@@ -153,7 +141,8 @@ public class ChatBean {
             messageDao.update(message);
         }
     }
-    public void markAllChatMessagesAsRead(String senderUsername) {
+
+    public void markAllChatMessagesAsReadAndDelivered(String senderUsername) {
         ArrayList<ChatMessageEntity> arrayMessages = messageDao.findAllUnreadChatMessages(senderUsername);
         for (ChatMessageEntity message : arrayMessages) {
             message.setRead(true);
@@ -171,7 +160,7 @@ public class ChatBean {
     private ChatMessage chatMessageEntityToDTO(ChatMessageEntity entity) {
         if (entity != null) {
             return new ChatMessage(entity.getId(), entity.getSender().getUsername(), entity.getReceiver().getUsername(),
-                    entity.getMessage(), entity.getSentAt(), entity.isRead());
+                    entity.getMessage(), entity.getSentAt(), entity.isRead(), entity.isDelivered());
         } else {
             return null;
         }
@@ -181,7 +170,7 @@ public class ChatBean {
         if (message != null) {
             UserEntity sender = getUserByUsername(message.getSenderUsername());
             UserEntity receiver = getUserByUsername(message.getReceiverUsername());
-            return new ChatMessageEntity(sender, receiver, message.getMessage(), message.getSentAt(), message.isRead());
+            return new ChatMessageEntity(sender, receiver, message.getMessage(), message.getSentAt(), message.isRead(), message.isDelivered());
         } else {
             return null;
         }
@@ -221,6 +210,7 @@ public class ChatBean {
         jsonObject.addProperty("receiverUsername", chatMessage.getReceiverUsername());
         jsonObject.addProperty("message", chatMessage.getMessage());
         jsonObject.addProperty("sentAt", chatMessage.getSentAt().toString());
+        jsonObject.addProperty("isRead", chatMessage.isRead());
 
         return jsonObject.toString();
     }
@@ -231,7 +221,20 @@ public class ChatBean {
         jsonObject.addProperty("receiverUsername", chatNotification.getReceiverUsername());
         jsonObject.addProperty("message", chatNotification.getMessage());
         jsonObject.addProperty("sentAt", chatNotification.getSentAt().toString());
+        jsonObject.addProperty("isRead", chatNotification.isRead());
 
         return jsonObject.toString();
+    }
+
+    public void setMessagesAsReadFromSenderToUser(String usernameSender, String usernameReceiver) {
+        ArrayList<ChatMessageEntity> messages = messageDao.findAllChatMessagesBetweenUsersReceiverIsUser(usernameSender, usernameReceiver);
+        for (ChatMessageEntity message : messages) {
+            message.setRead(true);
+            messageDao.update(message);
+        }
+    }
+
+    public void setNotificationsAsReadFromSenderToUser(String usernameSender, String usernameReceiver) {
+        notificationDao.markAllChatNotificationsAsRead(usernameSender, usernameReceiver);
     }
 }

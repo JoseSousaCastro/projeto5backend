@@ -14,6 +14,9 @@ public class UserStats {
     @XmlElement
     int totalUserDoneTasks;
 
+    private static final long serialVersionUID = 1L;
+
+
     public UserStats() {
     }
 

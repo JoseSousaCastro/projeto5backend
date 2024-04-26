@@ -13,6 +13,8 @@ import project5.entity.UserEntity;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.*;
+
 @Singleton
 @ServerEndpoint("/websocket/tasks/{token}")
 public class WSTasks {
@@ -21,9 +23,12 @@ public class WSTasks {
 
     @Inject
     private ChatBean chatBean;
-
     @EJB
     private UserDao userDao;
+
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(WSTasks.class);
 
     public void send(String msg) {
         System.out.println("Sending message via WSTasks: " + msg);

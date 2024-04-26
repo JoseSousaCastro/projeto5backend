@@ -6,11 +6,14 @@ import jakarta.persistence.NoResultException;
 
 import java.util.ArrayList;
 
+import org.apache.logging.log4j.*;
 
 @Stateless
 public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity> {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(ChatNotificationDao.class);
 
     public ChatNotificationDao() {
         super(ChatNotificationEntity.class);
@@ -58,12 +61,15 @@ public class ChatNotificationDao extends AbstractDao<ChatNotificationEntity> {
         }
     }
 
-    public void markAllChatNotificationsAsRead(String receiverUsername) {
-        ArrayList<ChatNotificationEntity> unreadNotifications = new ArrayList<>(em.createNamedQuery("ChatNotification.findUnreadChatNotifications",
+    public void markAllChatNotificationsAsRead(String receiverUsername, String senderUsername) {
+        ArrayList<ChatNotificationEntity> unreadNotifications = new ArrayList<>(em.createNamedQuery("ChatNotification.findUnreadChatNotificationsBetweenUsers",
                         ChatNotificationEntity.class)
                 .setParameter("receiver", receiverUsername)
+                .setParameter("sender", senderUsername)
                 .getResultList());
-
+        System.out.println("receiverUsername: " + receiverUsername);
+        System.out.println("senderUsername: " + senderUsername);
+        System.out.println("unreadNotifications: " + unreadNotifications);
         if (!unreadNotifications.isEmpty()) {
             // Marca a primeira notificação como lida
             unreadNotifications.get(0).setRead(true);

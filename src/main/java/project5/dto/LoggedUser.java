@@ -43,6 +43,9 @@ public class LoggedUser {
     @XmlElement
     private LocalDate creationDate;
 
+    private static final long serialVersionUID = 1L;
+
+
     public LoggedUser() {
     }
 
@@ -116,20 +119,28 @@ public class LoggedUser {
         this.photoURL = photoURL;
     }
 
-    public boolean isVisible() { return visible; }
+    public boolean isVisible() {
+        return visible;
+    }
 
-    public void setVisible(boolean visible) { this.visible = visible; }
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
 
-    public int getTypeOfUser() { return typeOfUser; }
+    public int getTypeOfUser() {
+        return typeOfUser;
+    }
 
-    public void setTypeOfUser(int typeOfUser) { this.typeOfUser = typeOfUser; }
+    public void setTypeOfUser(int typeOfUser) {
+        this.typeOfUser = typeOfUser;
+    }
 
     public void setInitialTypeOfUser() {
         this.typeOfUser = DEVELOPER;
     }
 
     public void editTypeOfUser(int stateId) {
-         if (stateId == SCRUMMASTER) {
+        if (stateId == SCRUMMASTER) {
             this.typeOfUser = SCRUMMASTER;
         } else if (stateId == PRODUCTOWNER) {
             this.typeOfUser = PRODUCTOWNER;
@@ -141,6 +152,7 @@ public class LoggedUser {
     public String getToken() {
         return token;
     }
+
     public void setToken(String token) {
         this.token = token;
     }
@@ -148,6 +160,7 @@ public class LoggedUser {
     public boolean isConfirmed() {
         return confirmed;
     }
+
     public void setConfirmed(boolean confirmed) {
         this.confirmed = confirmed;
     }
@@ -155,6 +168,7 @@ public class LoggedUser {
     public LocalDate getCreationDate() {
         return creationDate;
     }
+
     public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
     }

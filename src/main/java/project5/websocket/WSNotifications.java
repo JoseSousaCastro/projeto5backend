@@ -13,7 +13,8 @@ import project5.entity.UserEntity;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
+
+import org.apache.logging.log4j.*;
 
 @Singleton
 @ServerEndpoint("/websocket/notifications/{token}")
@@ -23,9 +24,12 @@ public class WSNotifications {
 
     @Inject
     private ChatBean chatBean;
-
     @EJB
     private UserDao userDao;
+
+    private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(WSNotifications.class);
 
     public void send(String username, String notification) {
         Session session = sessions.get(username);

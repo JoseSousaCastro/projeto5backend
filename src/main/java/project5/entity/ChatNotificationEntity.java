@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
         "AND c.isRead = false")
 @NamedQuery(name = "ChatNotification.countAllChatNotificationsNotRead", query = "SELECT COUNT(c) FROM ChatNotificationEntity c " +
         "WHERE c.receiver.username = :receiver AND c.isRead = false")
-@NamedQuery(name = "ChatNotification.findUnreadChatNotifications", query = "SELECT c FROM ChatNotificationEntity c WHERE c.receiver.username = :receiver " +
-        "AND c.isRead = false")
+@NamedQuery(name = "ChatNotification.findUnreadChatNotificationsBetweenUsers", query = "SELECT c FROM ChatNotificationEntity c WHERE c.receiver.username = :receiver " +
+        "AND c.sender.username = :sender AND c.isRead = false")
 @NamedQuery(name = "ChatNotification.markChatNotificationAsRead", query = "UPDATE ChatNotificationEntity c SET c.isRead = true " +
         "WHERE c.sender.username = :sender AND c.receiver.username = :receiver")
 @NamedQuery(name = "ChatNotification.dontShowChatNotification", query = "UPDATE ChatNotificationEntity c SET c.isRead = true " +
@@ -24,9 +24,10 @@ import java.time.LocalDateTime;
 @NamedQuery(name = "ChatNotification.findLatestChatNotification", query = "SELECT c FROM ChatNotificationEntity c WHERE (c.sender.username = :sender " +
         "AND c.receiver.username = :receiver) AND c.sentAt = (SELECT MAX(c.sentAt) FROM ChatNotificationEntity c WHERE (c.sender.username = :sender " +
         "AND c.receiver.username = :receiver))")
-public class ChatNotificationEntity implements Serializable{
+public class ChatNotificationEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -71,15 +72,15 @@ public class ChatNotificationEntity implements Serializable{
     public UserEntity getSender() {
         return sender;
     }
-    
+
     public void setSender(UserEntity sender) {
         this.sender = sender;
     }
-    
+
     public UserEntity getReceiver() {
         return receiver;
     }
-    
+
     public void setReceiver(UserEntity receiver) {
         this.receiver = receiver;
     }

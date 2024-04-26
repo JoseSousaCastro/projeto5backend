@@ -2,6 +2,7 @@ package project5.dto;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+
 import java.time.LocalDateTime;
 
 @XmlRootElement
@@ -9,21 +10,19 @@ public class ChatNotification {
 
     @XmlElement
     private Long id;
-
     @XmlElement
     private String senderUsername;
-
     @XmlElement
     private String receiverUsername;
-
     @XmlElement
     private String message;
-
     @XmlElement
     private LocalDateTime sentAt;
-
     @XmlElement
     private boolean isRead;
+
+    private static final long serialVersionUID = 1L;
+
 
     public ChatNotification() {
     }

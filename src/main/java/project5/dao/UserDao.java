@@ -6,10 +6,14 @@ import project5.entity.UserEntity;
 
 import java.util.ArrayList;
 
+import org.apache.logging.log4j.*;
+
 @Stateless
 public class UserDao extends AbstractDao<UserEntity> {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger logger = LogManager.getLogger(UserDao.class);
 
     public UserDao() {
         super(UserEntity.class);

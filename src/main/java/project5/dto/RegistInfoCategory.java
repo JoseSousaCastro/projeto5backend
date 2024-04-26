@@ -10,6 +10,9 @@ public class RegistInfoCategory {
     @XmlElement
     private int quantity;
 
+    private static final long serialVersionUID = 1L;
+
+
     public RegistInfoCategory() {
         // Construtor vazio necessário para JAXB
     }
