@@ -42,6 +42,8 @@ public class User {
     private boolean confirmed;
     @XmlElement
     private LocalDate creationDate;
+    @XmlElement
+    private long tokenExpirationTime;
 
     private static final long serialVersionUID = 1L;
 
@@ -173,53 +175,14 @@ public class User {
         this.creationDate = creationDate;
     }
 
-    public int getCreationMonth() {
-        if (creationDate != null) {
-            return creationDate.getMonthValue();
-        }
-        return 0;
+
+    public long getTokenExpirationTime() {
+        return tokenExpirationTime;
     }
 
-    public String getCreationMonthName() {
-        if (creationDate != null) {
-            int month = creationDate.getMonthValue();
-            switch (month) {
-                case 1:
-                    return "Jan";
-                case 2:
-                    return "Feb";
-                case 3:
-                    return "Mar";
-                case 4:
-                    return "Apr";
-                case 5:
-                    return "May";
-                case 6:
-                    return "Jun";
-                case 7:
-                    return "Jul";
-                case 8:
-                    return "Aug";
-                case 9:
-                    return "Sep";
-                case 10:
-                    return "Oct";
-                case 11:
-                    return "Nov";
-                case 12:
-                    return "Dec";
-            }
-        }
-        return "";
+    public void setTokenExpirationTime(long tokenExpirationTime) {
+        this.tokenExpirationTime = tokenExpirationTime;
     }
-
-    public int getCreationYear() {
-        if (creationDate != null) {
-            return creationDate.getYear();
-        }
-        return 0;
-    }
-
     @Override
     public String toString() {
         return "User{" +

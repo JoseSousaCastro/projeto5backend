@@ -1,12 +1,14 @@
 package project5.bean;
 
 import project5.dao.TaskDao;
+import project5.dao.TokenExpirationDao;
 import project5.dao.UserDao;
 import project5.dto.LoggedUser;
 import project5.dto.Login;
 import project5.dto.Task;
 import project5.dto.User;
 import project5.entity.TaskEntity;
+import project5.entity.TokenExpirationEntity;
 import project5.entity.UserEntity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
@@ -36,6 +38,8 @@ public class UserBean implements Serializable {
     private CategoryBean categoryBean;
     @EJB
     private WSDashboard wsDashboard;
+    @EJB
+    private TokenExpirationDao tokenExpirationDao;
 
     private static final long serialVersionUID = 1L;
 
@@ -356,6 +360,7 @@ public class UserBean implements Serializable {
         byte[] randomBytes = new byte[24];
         secureRandom.nextBytes(randomBytes);
         logger.info("Token generated");
+        // tokenTimeoutDao.saveTokenTimeout(new TokenTimeoutEntity(base64Encoder.encodeToString(randomBytes), System.currentTimeMillis() + 3600000));
         return base64Encoder.encodeToString(randomBytes);
     }
 
@@ -479,6 +484,10 @@ public class UserBean implements Serializable {
                 u.setTypeOfUser(user.getTypeOfUser());
                 logger.info("User " + u.getUsername() + " has changed his type of user to " + user.getTypeOfUser());
             }
+            if (user.getTokenExpirationTime() != 0) {
+                u.setTokenExpirationTime(user.getTokenExpirationTime());
+                logger.info("User " + u.getUsername() + " has changed his token expiration time to " + user.getTokenExpirationTime());
+            }
             try {
                 userDao.merge(u); //Atualiza o user na base de dados
                 logger.info("User " + u.getUsername() + " has been updated");
@@ -515,7 +524,6 @@ public class UserBean implements Serializable {
             logger.info("User " + u.getUsername() + " has changed his role to " + u.getTypeOfUser());
             status = true;
         }
-        logger.error("User " + u.getUsername() + " could not be updated");
         return status;
     }
 
@@ -527,6 +535,7 @@ public class UserBean implements Serializable {
         }
         return validUser;
     }
+
 
     public boolean isUsernameAvailable(User user) {
         UserEntity u = userDao.findUserByUsername(user.getUsername());
@@ -787,4 +796,37 @@ public class UserBean implements Serializable {
         }
         return null;
     }
+
+    public User findUserByToken(String token) {
+        UserEntity userEntity = userDao.findUserByToken(token);
+        if (userEntity != null) {
+            return convertUserEntitytoUserDto(userEntity);
+        }
+        return null;
+    }
+
+    public void updateTokenExpirationTime(UserEntity user) {
+        if (user != null) {
+            TokenExpirationEntity tokenExpirationEntity = tokenExpirationDao.findTokenExpirationEntity();
+            long currentTime = System.currentTimeMillis();
+            user.setTokenExpirationTime(currentTime + tokenExpirationEntity.getTokenExpirationTime());
+            User userDto = convertUserEntitytoUserDto(user);
+            updateUser(userDto, user.getUsername());
+            logger.info("User " + user.getUsername() + " has updated his token expiration time");
+        } else {
+            logger.error("User " + user.getUsername() + " could not update his token expiration time");
+        }
+    }
+
+    public boolean isTokenExpired(UserEntity user) {
+        if (user != null) {
+            long currentTime = System.currentTimeMillis();
+            logger.info("User " + user.getUsername() + " has an expired token");
+            return currentTime > user.getTokenExpirationTime();
+        } else {
+            logger.error("User " + user.getUsername() + " user does not have an expired token");
+            return false;
+        }
+    }
+
 }

@@ -69,6 +69,9 @@ public class UserEntity implements Serializable {
     @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<TaskEntity> userTasks;
 
+    @Column(name = "token_expiration_time", nullable = true, unique = false, updatable = true)
+    private long tokenExpirationTime;
+
 
     //default empty constructor
     public UserEntity() {
@@ -184,6 +187,14 @@ public class UserEntity implements Serializable {
 
     public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public long getTokenExpirationTime() {
+        return tokenExpirationTime;
+    }
+
+    public void setTokenExpirationTime(long tokenExpirationTime) {
+        this.tokenExpirationTime = tokenExpirationTime;
     }
 
     public String getCreationMonth() {
