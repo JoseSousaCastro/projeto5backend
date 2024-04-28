@@ -61,7 +61,7 @@ public class UserService implements Serializable {
             if (userEntity != null) {
                 logger.info("User '{}' found. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                         loggedUser.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
-                userBean.updateTokenExpirationTime(userEntity);
+                userBean.createTokenTimeoutForUser(userEntity);
                 logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                         loggedUser.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
             }
@@ -83,7 +83,8 @@ public class UserService implements Serializable {
 
         logger.info("User '{}' logged out. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userBean.convertEntityByToken(token).getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
-        if (userBean.logout(token)) return Response.status(200).entity("Logout Successful!").build();
+        if (userBean.logout(token))
+            return Response.status(200).entity("Logout Successful!").build();
         logger.info("Failed logout attempt. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
                 request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         return Response.status(401).entity("Invalid Token!").build();
@@ -96,14 +97,12 @@ public class UserService implements Serializable {
     public Response registerUser(@HeaderParam("token") String token, User user, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
-        userBean.isTokenExpired(userEntity);
-        logger.info("User '{}' token has expired. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
-                userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
-        logger.info("User '{}' is trying to register. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
-                user.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+        logger.info("User '{}' is trying to register a new user {}. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                userEntity.getUsername(), user.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         boolean isUsernameAvailable = userBean.isUsernameAvailable(user);
         logger.info("Username '{}' is available: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 user.getUsername(), isUsernameAvailable, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -123,6 +122,7 @@ public class UserService implements Serializable {
         logger.info("Expiration time for defining the password started at: '{}'. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 expirationTime, request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         user.setExpirationTime(expirationTime);
+        user.setTokenExpirationTime(System.currentTimeMillis() + 3 * 24 * 60 * 60 * 1000); // 3 dias em milissegundos
         user.setConfirmed(false);
         logger.info("User '{}' is not confirmed yet. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 user.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -175,6 +175,7 @@ public class UserService implements Serializable {
     public Response getFirstName(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -202,6 +203,7 @@ public class UserService implements Serializable {
     public Response getImage(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -229,6 +231,7 @@ public class UserService implements Serializable {
     public Response getUsername(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -257,6 +260,7 @@ public class UserService implements Serializable {
     public Response getTypeOfUser(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -283,6 +287,7 @@ public class UserService implements Serializable {
     public Response getUsernameFromEmail(@HeaderParam("email") String email, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -311,6 +316,7 @@ public class UserService implements Serializable {
     public Response updateUser(@PathParam("username") String username, @HeaderParam("token") String token, User user, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -363,6 +369,7 @@ public class UserService implements Serializable {
                                    @HeaderParam("oldpassword") String oldPassword,
                                    @HeaderParam("newpassword") String newPassword, @Context HttpServletRequest request) {
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -400,6 +407,7 @@ public class UserService implements Serializable {
     public Response updatePassword(@PathParam("username") String username,
                                    @HeaderParam("newpassword") String newPassword, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -445,6 +453,7 @@ public class UserService implements Serializable {
     @Produces(MediaType.TEXT_PLAIN)
     public Response sendRecoverPasswordEmail(@HeaderParam("email") String email, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -481,6 +490,7 @@ public class UserService implements Serializable {
     public Response resetPassword(@PathParam("username") String username,
                                   @HeaderParam("newpassword") String newPassword, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -533,6 +543,7 @@ public class UserService implements Serializable {
     public Response updateVisibility(@PathParam("username") String username, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -573,6 +584,7 @@ public class UserService implements Serializable {
         String usernamePO = userBean.convertEntityByToken(token).getUsername();
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -619,6 +631,7 @@ public class UserService implements Serializable {
     public Response removeUser(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -653,6 +666,7 @@ public class UserService implements Serializable {
     public Response getUsers(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -679,6 +693,7 @@ public class UserService implements Serializable {
     public Response getUsersByVisibility(@HeaderParam("token") String token, @PathParam("visible") boolean visible, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -705,6 +720,7 @@ public class UserService implements Serializable {
     public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -731,6 +747,7 @@ public class UserService implements Serializable {
     public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser, @PathParam("visible") boolean visible, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -757,6 +774,7 @@ public class UserService implements Serializable {
     public Response getUser(@PathParam("username") String username, @HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -789,6 +807,7 @@ public class UserService implements Serializable {
     public Response getAllTasks(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -815,6 +834,7 @@ public class UserService implements Serializable {
     public Response getAllTasksFromUser(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -850,6 +870,7 @@ public class UserService implements Serializable {
     public Response newTask(@HeaderParam("token") String token, @PathParam("username") String username, Task task, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -900,6 +921,7 @@ public class UserService implements Serializable {
     public Response updateTask(@HeaderParam("token") String token, @PathParam("id") String id, Task task, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -943,6 +965,7 @@ public class UserService implements Serializable {
     public Response updateTaskStatus(@HeaderParam("token") String token, @PathParam("taskId") String taskId, @PathParam("newStateId") int stateId, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -977,6 +1000,7 @@ public class UserService implements Serializable {
     public Response eraseTask(@HeaderParam("token") String token, @PathParam("taskId") String id, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1025,6 +1049,7 @@ public class UserService implements Serializable {
     public Response eraseAllTasksFromUser(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1073,6 +1098,7 @@ public class UserService implements Serializable {
     public Response deleteTask(@HeaderParam("token") String token, @PathParam("taskId") String id, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1121,6 +1147,7 @@ public class UserService implements Serializable {
     public Response getTasksByCategory(@HeaderParam("token") String token, @PathParam("category") String category, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1155,6 +1182,7 @@ public class UserService implements Serializable {
     public Response getErasedTasks(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1189,6 +1217,7 @@ public class UserService implements Serializable {
     public Response newCategory(@HeaderParam("token") String token, Category category, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1243,6 +1272,7 @@ public class UserService implements Serializable {
     public Response deleteCategory(@HeaderParam("token") String token, @PathParam("categoryName") String categoryName, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1291,6 +1321,7 @@ public class UserService implements Serializable {
     public Response editCategory(@HeaderParam("token") String token, @PathParam("categoryName") String categoryName, @HeaderParam("newCategoryName") String newCategoryName, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1339,6 +1370,7 @@ public class UserService implements Serializable {
     public Response getAllCategories(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1374,6 +1406,7 @@ public class UserService implements Serializable {
     public Response getAllStats(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1434,6 +1467,7 @@ public class UserService implements Serializable {
     public Response getUserStats(@HeaderParam("token") String token, @PathParam("username") String username, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1474,6 +1508,7 @@ public class UserService implements Serializable {
     public Response getAllMessagesBetweenUsers(@HeaderParam("token") String token, @PathParam("usernameReceiver") String usernameReceiver, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1507,6 +1542,7 @@ public class UserService implements Serializable {
     public Response getAllUnreadNotifications(@HeaderParam("token") String token, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1539,6 +1575,7 @@ public class UserService implements Serializable {
     public Response markNotificationsAsRead(@HeaderParam("token") String token, @PathParam("senderUsername") String senderUsername, @Context HttpServletRequest request) {
         Response response;
         UserEntity userEntity = userDao.findUserByToken(token);
+
         userBean.updateTokenExpirationTime(userEntity);
         logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1585,7 +1622,8 @@ public class UserService implements Serializable {
                         request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 tokenExpirationEntity = new TokenExpirationEntity();
             }
-            tokenExpirationEntity.setTokenExpirationTime(time);
+            long timeInMilliseconds = time * 60 * 1000;
+            tokenExpirationEntity.setTokenExpirationTime(timeInMilliseconds);
             tokenExpirationDao.saveTokenExpirationTime(tokenExpirationEntity);
             return Response.status(200).entity("Token expiration time set").build();
         }

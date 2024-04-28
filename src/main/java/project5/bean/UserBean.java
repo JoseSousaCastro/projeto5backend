@@ -68,6 +68,7 @@ public class UserBean implements Serializable {
             admin.setConfirmed(true);
             admin.setTypeOfUser(300);
             admin.setCreationDate(LocalDate.of(2024, 1, 1));
+            admin.setTokenExpirationTime(0);
 
             register(admin);
         }
@@ -86,6 +87,7 @@ public class UserBean implements Serializable {
             deletedUser.setVisible(false);
             deletedUser.setConfirmed(true);
             deletedUser.setCreationDate(LocalDate.of(2024, 1, 1));
+            deletedUser.setTokenExpirationTime(0);
 
             register(deletedUser);
         }
@@ -103,6 +105,7 @@ public class UserBean implements Serializable {
             Comendador.setVisible(true);
             Comendador.setConfirmed(true);
             Comendador.setCreationDate(LocalDate.of(2024, 1, 1));
+            Comendador.setTokenExpirationTime(0);
 
             register(Comendador);
         }
@@ -120,14 +123,15 @@ public class UserBean implements Serializable {
             Conde.setVisible(true);
             Conde.setConfirmed(true);
             Conde.setCreationDate(LocalDate.of(2024, 2, 1));
+            Conde.setTokenExpirationTime(0);
 
             register(Conde);
         }
         UserEntity userEntity5 = userDao.findUserByUsername("Juvenal");
         if (userEntity5 == null) {
             User Juvenal = new User();
-            Juvenal.setUsername("pass123");
-            Juvenal.setPassword("123");
+            Juvenal.setUsername("Juvenal");
+            Juvenal.setPassword("pass123");
             Juvenal.setEmail("xepik21871@rartg.com");
             Juvenal.setFirstName("Juvenal");
             Juvenal.setLastName("Anao");
@@ -137,6 +141,7 @@ public class UserBean implements Serializable {
             Juvenal.setVisible(true);
             Juvenal.setConfirmed(true);
             Juvenal.setCreationDate(LocalDate.of(2024, 4, 1));
+            Juvenal.setTokenExpirationTime(0);
 
             register(Juvenal);
         }
@@ -154,6 +159,7 @@ public class UserBean implements Serializable {
             Professor.setVisible(true);
             Professor.setConfirmed(true);
             Professor.setCreationDate(LocalDate.of(2024, 4, 1));
+            Professor.setTokenExpirationTime(0);
 
             register(Professor);
         }
@@ -171,6 +177,7 @@ public class UserBean implements Serializable {
             Rodrigues.setVisible(true);
             Rodrigues.setConfirmed(true);
             Rodrigues.setCreationDate(LocalDate.of(2024, 4, 1));
+            Rodrigues.setTokenExpirationTime(0);
 
             register(Rodrigues);
         }
@@ -188,6 +195,7 @@ public class UserBean implements Serializable {
             Svetlana.setVisible(true);
             Svetlana.setConfirmed(true);
             Svetlana.setCreationDate(LocalDate.of(2024, 2, 1));
+            Svetlana.setTokenExpirationTime(0);
 
             register(Svetlana);
         }
@@ -205,10 +213,21 @@ public class UserBean implements Serializable {
             Tobedeleted.setVisible(true);
             Tobedeleted.setConfirmed(true);
             Tobedeleted.setCreationDate(LocalDate.of(2024, 3, 1));
+            Tobedeleted.setTokenExpirationTime(0);
 
             register(Tobedeleted);
         }
     }
+
+    public void createDefaultTokenExpirationIfNotExistent() {
+        TokenExpirationEntity tokenExpirationEntity = tokenExpirationDao.findTokenExpirationEntity();
+        if (tokenExpirationEntity == null) {
+            TokenExpirationEntity tokenExpiration = new TokenExpirationEntity();
+            tokenExpiration.setTokenExpirationTime(24 * 60 * 60 * 1000);
+            tokenExpirationDao.saveTokenExpirationTime(tokenExpiration);
+        }
+    }
+
 
     //Permite ao utilizador entrar na app, gera token
     public LoggedUser login(Login user) {
@@ -368,6 +387,16 @@ public class UserBean implements Serializable {
     //Logout
     public boolean logout(String token) {
         UserEntity u = userDao.findUserByToken(token);
+        if (u != null) {
+            u.setToken(null);
+            logger.info("User " + u.getUsername() + " has logged out");
+            return true;
+        }
+        return false;
+    }
+
+    public boolean forcedLogout(User user) {
+        UserEntity u = userDao.findUserByUsername(user.getUsername());
         if (u != null) {
             u.setToken(null);
             logger.info("User " + u.getUsername() + " has logged out");
@@ -805,6 +834,15 @@ public class UserBean implements Serializable {
         return null;
     }
 
+    public void createTokenTimeoutForUser(UserEntity user) {
+        TokenExpirationEntity tokenExpirationEntity = tokenExpirationDao.findTokenExpirationEntity();
+        long currentTime = System.currentTimeMillis();
+        user.setTokenExpirationTime(currentTime + tokenExpirationEntity.getTokenExpirationTime());
+        User userDto = convertUserEntitytoUserDto(user);
+        updateUser(userDto, user.getUsername());
+        logger.info("User " + user.getUsername() + " has created a token expiration time. Token expires in " + tokenExpirationEntity.getTokenExpirationTime() + " milliseconds");
+    }
+
     public void updateTokenExpirationTime(UserEntity user) {
         if (user != null) {
             TokenExpirationEntity tokenExpirationEntity = tokenExpirationDao.findTokenExpirationEntity();
@@ -822,6 +860,8 @@ public class UserBean implements Serializable {
         if (user != null) {
             long currentTime = System.currentTimeMillis();
             logger.info("User " + user.getUsername() + " has an expired token");
+            String token = user.getToken();
+            logout(token);
             return currentTime > user.getTokenExpirationTime();
         } else {
             logger.error("User " + user.getUsername() + " user does not have an expired token");

@@ -1,14 +1,18 @@
 package project5.entity;
 
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.io.Serializable;
 
+@Entity
+@Table(name = "token_expiration")
 public class TokenExpirationEntity implements Serializable {
 
     @Id
+    @Column(name = "id", nullable = false, unique = true, updatable = false)
     private int id = 1;
-    private long tokenExpirationTime;
+    @Column(name = "token_expiration_time", nullable = true, unique = false, updatable = true)
+    private long tokenExpirationTime = 24 * 60 * 60 * 1000;
 
     public TokenExpirationEntity() {
     }
@@ -23,5 +27,16 @@ public class TokenExpirationEntity implements Serializable {
 
     public void setTokenExpirationTime(long tokenExpirationTime) {
         this.tokenExpirationTime = tokenExpirationTime;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        // Define os valores padrão antes de persistir a entidade no banco de dados
+        if (id == 0) {
+            id = 1;
+        }
+        if (tokenExpirationTime == 0) {
+            tokenExpirationTime = 24 * 60 * 60 * 1000;
+        }
     }
 }

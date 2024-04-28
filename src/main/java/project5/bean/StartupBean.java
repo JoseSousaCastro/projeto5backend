@@ -17,6 +17,7 @@ public class StartupBean {
 
     @PostConstruct
     public void init() {
+        userBean.createDefaultTokenExpirationIfNotExistent();
         userBean.createDefaultUsersIfNotExistent();
     }
 }

@@ -1,19 +1,26 @@
 package project5.management;
 
+import jakarta.ejb.EJB;
 import project5.bean.CategoryBean;
 import project5.bean.UserBean;
 import project5.dto.User;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import org.apache.logging.log4j.*;
+import project5.websocket.WSNotifications;
+
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class UserManagementScheduler {
+public class UserManagementScheduler implements Serializable {
 
+    @EJB
     private UserBean userBean;
+    @EJB
+    private WSNotifications wsNotifications;
     private static final long serialVersionUID = 1L;
 
     private static final Logger logger = LogManager.getLogger(CategoryBean.class);
@@ -50,6 +57,10 @@ public class UserManagementScheduler {
                 // Adicione o usuário à lista de usuários a serem removidos
                 usersToRemove.add(user);
                 logger.info("User added to removal list: " + user.getUsername());
+            } else if (userBean.isTokenExpired(userBean.convertUserDtotoUserEntity(user))) {
+                logger.info("User token expired: " + user.getUsername());
+                userBean.forcedLogout(user);
+                wsNotifications.send(user.getUsername(), "Session has expired. Token expired.");
             }
         }
         // Remova os usuários expirados da lista original de usuários

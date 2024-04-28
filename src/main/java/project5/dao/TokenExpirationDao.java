@@ -1,10 +1,12 @@
 package project5.dao;
 
+import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import org.apache.logging.log4j.*;
 import project5.entity.TokenExpirationEntity;
 
+@Stateless
 public class TokenExpirationDao extends AbstractDao<TokenExpirationEntity>{
 
     private static final long serialVersionUID = 1L;
@@ -28,15 +30,16 @@ public class TokenExpirationDao extends AbstractDao<TokenExpirationEntity>{
     }
 
     public void saveTokenExpirationTime(TokenExpirationEntity tokenExpirationEntity) {
-        em.getTransaction().begin();
         em.persist(tokenExpirationEntity);
-        em.getTransaction().commit();
     }
 
     public void updateTokenExpirationTime(TokenExpirationEntity tokenExpirationEntity) {
-        em.getTransaction().begin();
         em.merge(tokenExpirationEntity);
-        em.getTransaction().commit();
+    }
+
+    public void initializeTokenExpirationEntity() {
+        TokenExpirationEntity tokenExpirationEntity = new TokenExpirationEntity();
+        em.persist(tokenExpirationEntity);
     }
 
 }
