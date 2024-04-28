@@ -7,12 +7,14 @@ import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import project5.bean.ChatBean;
+import project5.bean.UserBean;
 import project5.dao.UserDao;
 import project5.dto.ChatMessage;
 import project5.dto.ChatNotification;
 import project5.entity.UserEntity;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import org.apache.logging.log4j.*;
@@ -29,6 +31,8 @@ public class WSChat {
     private UserDao userDao;
     @EJB
     WSNotifications WSNotifications;
+    @EJB
+    UserBean userBean;
 
     private static final long serialVersionUID = 1L;
 
@@ -36,6 +40,8 @@ public class WSChat {
 
     public void send(String receiverUsername, String senderUsername, String token) {
         Session session = sessions.get(token);
+        UserEntity userEntity = userDao.findUserByToken(token);
+        userBean.updateTokenExpirationTime(userEntity);
         String msg = "All messages and notifications from " + receiverUsername + " to " + senderUsername + " are read";
         if (session != null) {
             System.out.println("sending from WSCHat.......... " + msg);
@@ -51,6 +57,7 @@ public class WSChat {
     public void toDoOnOpen(Session session, @PathParam("token") String token, @PathParam("receiver") String receiverUsername) {
         System.out.println("A new WSCHat session is opened for client with token: " + token);
         UserEntity sender = userDao.findUserByToken(token);
+        userBean.updateTokenExpirationTime(sender);
         String senderUsername = sender.getUsername();
         String conversationID = senderUsername + receiverUsername;
         System.out.println("Conversation ID from WSCHat: " + conversationID);
@@ -78,6 +85,7 @@ public class WSChat {
 
         UserEntity sender = userDao.findUserByToken(token);
         UserEntity receiver = userDao.findUserByUsername(receiverUsername);
+        userBean.updateTokenExpirationTime(sender);
 
         if (sender != null && receiver != null) {
             String text = chatBean.extractMessageText(message);

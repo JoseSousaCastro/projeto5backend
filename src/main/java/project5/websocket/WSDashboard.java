@@ -7,6 +7,7 @@ import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import project5.bean.ChatBean;
+import project5.bean.UserBean;
 import project5.dao.UserDao;
 import project5.entity.UserEntity;
 
@@ -25,6 +26,8 @@ public class WSDashboard {
     private ChatBean chatBean;
     @EJB
     private UserDao userDao;
+    @EJB
+    private UserBean userBean;
 
     private static final long serialVersionUID = 1L;
 
@@ -48,6 +51,7 @@ public class WSDashboard {
     public void toDoOnOpen(Session session, @PathParam("token") String token) {
         System.out.println("A new WSDashboard session is opened for client with token: " + token);
         UserEntity receiver = userDao.findUserByToken(token);
+        userBean.updateTokenExpirationTime(receiver);
         String usernameId = receiver.getUsername();
         System.out.println("WSDashboard usernameId: " + usernameId);
         sessions.put(usernameId, session);

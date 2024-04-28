@@ -8,6 +8,7 @@ import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import project5.bean.ChatBean;
+import project5.bean.UserBean;
 import project5.dao.UserDao;
 import project5.entity.UserEntity;
 
@@ -26,6 +27,8 @@ public class WSNotifications {
     private ChatBean chatBean;
     @EJB
     private UserDao userDao;
+    @EJB
+    private UserBean userBean;
 
     private static final long serialVersionUID = 1L;
 
@@ -51,6 +54,8 @@ public class WSNotifications {
     public void toDoOnOpen(Session session, @PathParam("token") String token) {
         System.out.println("A new WSNotifications session is opened for client with token: " + token);
         UserEntity receiver = userDao.findUserByToken(token);
+        userBean.updateTokenExpirationTime(receiver);
+
         String usernameId = receiver.getUsername();
         System.out.println("WSNotifications usernameId: " + usernameId);
         sessions.put(usernameId, session);
