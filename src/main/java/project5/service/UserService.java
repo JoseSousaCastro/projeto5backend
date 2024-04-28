@@ -1602,9 +1602,21 @@ public class UserService implements Serializable {
     }
 
     @PUT
-    @Path("/setTokenTimeout")
+    @Path("/setTokenTimeout/{time}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setTokenExpirationTime(@HeaderParam("time") long time, @HeaderParam("token") String token, @Context HttpServletRequest request) {
+    public Response setTokenExpirationTime(@PathParam("time") String time, @HeaderParam("token") String token, @Context HttpServletRequest request) {
+        long timeInMilliseconds = 0;
+
+        try {
+            Long timeLong = Long.valueOf(time);
+            System.out.println(timeLong);
+            timeInMilliseconds = timeLong * 60 * 1000;
+            System.out.println(timeInMilliseconds);
+        } catch (NumberFormatException e) {
+            // Se a string 'time' não puder ser convertida para long, retorna erro 400
+            return Response.status(400).entity("Invalid time format").build();
+        }
+
         if (!userBean.isAuthenticated(token)) {
             logger.info("User is not authenticated to set the token expiration time. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
                     request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
@@ -1622,9 +1634,10 @@ public class UserService implements Serializable {
                         request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
                 tokenExpirationEntity = new TokenExpirationEntity();
             }
-            long timeInMilliseconds = time * 60 * 1000;
             tokenExpirationEntity.setTokenExpirationTime(timeInMilliseconds);
-            tokenExpirationDao.saveTokenExpirationTime(tokenExpirationEntity);
+            System.out.println(tokenExpirationEntity.getTokenExpirationTime());
+            tokenExpirationDao.updateTokenExpirationTime(tokenExpirationEntity);
+            System.out.println(tokenExpirationEntity.getTokenExpirationTime());
             return Response.status(200).entity("Token expiration time set").build();
         }
     }

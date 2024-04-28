@@ -28,15 +28,4 @@ public class TokenExpirationEntity implements Serializable {
     public void setTokenExpirationTime(long tokenExpirationTime) {
         this.tokenExpirationTime = tokenExpirationTime;
     }
-
-    @PrePersist
-    public void prePersist() {
-        // Define os valores padrão antes de persistir a entidade no banco de dados
-        if (id == 0) {
-            id = 1;
-        }
-        if (tokenExpirationTime == 0) {
-            tokenExpirationTime = 24 * 60 * 60 * 1000;
-        }
-    }
 }

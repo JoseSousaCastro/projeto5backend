@@ -33,8 +33,12 @@ public class TokenExpirationDao extends AbstractDao<TokenExpirationEntity>{
         em.persist(tokenExpirationEntity);
     }
 
-    public void updateTokenExpirationTime(TokenExpirationEntity tokenExpirationEntity) {
-        em.merge(tokenExpirationEntity);
+    public void updateTokenExpirationTime(TokenExpirationEntity newExpirationTime) {
+        TokenExpirationEntity tokenExpirationEntity = findTokenExpirationEntity(); // Obtém a entidade existente
+        if (tokenExpirationEntity != null) {
+            tokenExpirationEntity.setTokenExpirationTime(newExpirationTime.getTokenExpirationTime());
+            em.merge(tokenExpirationEntity); // Atualiza a entidade no banco de dados
+        }
     }
 
     public void initializeTokenExpirationEntity() {
