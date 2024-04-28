@@ -53,6 +53,10 @@ public class UserBean implements Serializable {
         this.userDao = userDao;
     }
 
+    public void setTaskDao(TaskDao taskDao) {
+        this.taskDao = taskDao;
+    }
+
     public void createDefaultUsersIfNotExistent() {
         UserEntity userEntity = userDao.findUserByUsername("admin");
         if (userEntity == null) {
@@ -90,132 +94,6 @@ public class UserBean implements Serializable {
             deletedUser.setTokenExpirationTime(0);
 
             register(deletedUser);
-        }
-        UserEntity userEntity3 = userDao.findUserByUsername("Comendador");
-        if (userEntity3 == null) {
-            User Comendador = new User();
-            Comendador.setUsername("Comendador");
-            Comendador.setPassword("pass123");
-            Comendador.setEmail("josemscastro@gmail.com");
-            Comendador.setFirstName("Comendador");
-            Comendador.setLastName("Tuca");
-            Comendador.setPhone("917896541");
-            Comendador.setPhotoURL("https://static.wixstatic.com/media/8d11e2_4c9abf55944042c8b26565c72d5e0afb~mv2.png/v1/crop/x_0,y_23,w_245,h_200/fill/w_245,h_200,al_c,q_85,enc_auto/Comendador%20Tuca.png");
-            Comendador.setTypeOfUser(300);
-            Comendador.setVisible(true);
-            Comendador.setConfirmed(true);
-            Comendador.setCreationDate(LocalDate.of(2024, 1, 1));
-            Comendador.setTokenExpirationTime(0);
-
-            register(Comendador);
-        }
-        UserEntity userEntity4 = userDao.findUserByUsername("Conde");
-        if (userEntity4 == null) {
-            User Conde = new User();
-            Conde.setUsername("Conde");
-            Conde.setPassword("pass123");
-            Conde.setEmail("mail.do.castro@gmail.com");
-            Conde.setFirstName("Conde");
-            Conde.setLastName("Sottomayor");
-            Conde.setPhone("901234567");
-            Conde.setPhotoURL("https://static.wixstatic.com/media/8d11e2_5e87201b41064678a5ba5391efb549da.png/v1/fill/w_159,h_190,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/8d11e2_5e87201b41064678a5ba5391efb549da.png");
-            Conde.setTypeOfUser(200);
-            Conde.setVisible(true);
-            Conde.setConfirmed(true);
-            Conde.setCreationDate(LocalDate.of(2024, 2, 1));
-            Conde.setTokenExpirationTime(0);
-
-            register(Conde);
-        }
-        UserEntity userEntity5 = userDao.findUserByUsername("Juvenal");
-        if (userEntity5 == null) {
-            User Juvenal = new User();
-            Juvenal.setUsername("Juvenal");
-            Juvenal.setPassword("pass123");
-            Juvenal.setEmail("xepik21871@rartg.com");
-            Juvenal.setFirstName("Juvenal");
-            Juvenal.setLastName("Anao");
-            Juvenal.setPhone("937418520");
-            Juvenal.setPhotoURL("https://static.wixstatic.com/media/8d11e2_426a9fa64bfe4502a9729c87a99cf500.png/v1/fill/w_200,h_168,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/8d11e2_426a9fa64bfe4502a9729c87a99cf500.png");
-            Juvenal.setTypeOfUser(100);
-            Juvenal.setVisible(true);
-            Juvenal.setConfirmed(true);
-            Juvenal.setCreationDate(LocalDate.of(2024, 4, 1));
-            Juvenal.setTokenExpirationTime(0);
-
-            register(Juvenal);
-        }
-        UserEntity userEntity6 = userDao.findUserByUsername("Professor");
-        if (userEntity6 == null) {
-            User Professor = new User();
-            Professor.setUsername("Professor");
-            Professor.setPassword("pass123");
-            Professor.setEmail("jennica52@ynmerchant.com");
-            Professor.setFirstName("Professor");
-            Professor.setLastName("Mutumbu");
-            Professor.setPhone("931478520");
-            Professor.setPhotoURL("https://static.wixstatic.com/media/8d11e2_984ac291b0ba488692aafb79ae4163fb.png/v1/fill/w_185,h_190,al_c,q_85,enc_auto/8d11e2_984ac291b0ba488692aafb79ae4163fb.png");
-            Professor.setTypeOfUser(100);
-            Professor.setVisible(true);
-            Professor.setConfirmed(true);
-            Professor.setCreationDate(LocalDate.of(2024, 4, 1));
-            Professor.setTokenExpirationTime(0);
-
-            register(Professor);
-        }
-        UserEntity userEntity7 = userDao.findUserByUsername("Rodrigues");
-        if (userEntity7 == null) {
-            User Rodrigues = new User();
-            Rodrigues.setUsername("Rodrigues");
-            Rodrigues.setPassword("pass123");
-            Rodrigues.setEmail("jose.sousacastro@gmail.com");
-            Rodrigues.setFirstName("Rodrigues");
-            Rodrigues.setLastName("Fotografo");
-            Rodrigues.setPhone("969638520");
-            Rodrigues.setPhotoURL("https://static.wixstatic.com/media/8d11e2_532c2a0fd60e471caef67ab4b89d8737~mv2.png/v1/crop/x_45,y_1,w_285,h_190/fill/w_254,h_170,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/8d11e2_532c2a0fd60e471caef67ab4b89d8737~mv2.png");
-            Rodrigues.setTypeOfUser(100);
-            Rodrigues.setVisible(true);
-            Rodrigues.setConfirmed(true);
-            Rodrigues.setCreationDate(LocalDate.of(2024, 4, 1));
-            Rodrigues.setTokenExpirationTime(0);
-
-            register(Rodrigues);
-        }
-        UserEntity userEntity8 = userDao.findUserByUsername("Svetlana");
-        if (userEntity8 == null) {
-            User Svetlana = new User();
-            Svetlana.setUsername("Svetlana");
-            Svetlana.setPassword("pass123");
-            Svetlana.setEmail("tucatucatuca.pt@gmail.com");
-            Svetlana.setFirstName("Svetlana");
-            Svetlana.setLastName("Kondeixanova");
-            Svetlana.setPhone("967418520");
-            Svetlana.setPhotoURL("https://static.wixstatic.com/media/8d11e2_1cbe099d2bfe4a54a6de5b5438ed804a~mv2.png/v1/crop/x_88,y_14,w_475,h_451/fill/w_221,h_210,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Svetlana%20Kondeixanova%20-%20sem%20fundo.png");
-            Svetlana.setTypeOfUser(200);
-            Svetlana.setVisible(true);
-            Svetlana.setConfirmed(true);
-            Svetlana.setCreationDate(LocalDate.of(2024, 2, 1));
-            Svetlana.setTokenExpirationTime(0);
-
-            register(Svetlana);
-        }
-        UserEntity userEntity9 = userDao.findUserByUsername("Tobedeleted");
-        if (userEntity9 == null) {
-            User Tobedeleted = new User();
-            Tobedeleted.setUsername("Tobedeleted");
-            Tobedeleted.setPassword("pass123");
-            Tobedeleted.setEmail("ufekevy@mailto.plus");
-            Tobedeleted.setFirstName("Tobe");
-            Tobedeleted.setLastName("Deleted");
-            Tobedeleted.setPhone("907894561");
-            Tobedeleted.setPhotoURL("https://images.freeimages.com/images/large-previews/023/geek-avatar-1632962.jpg");
-            Tobedeleted.setTypeOfUser(100);
-            Tobedeleted.setVisible(true);
-            Tobedeleted.setConfirmed(true);
-            Tobedeleted.setCreationDate(LocalDate.of(2024, 3, 1));
-            Tobedeleted.setTokenExpirationTime(0);
-
-            register(Tobedeleted);
         }
     }
 

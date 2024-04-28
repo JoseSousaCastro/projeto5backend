@@ -1,0 +1,9 @@
+00:00:02.309 [main] INFO - Email sent to recipient@example.com
+00:00:03.549 [main] INFO - Email sent to testuser@example.com
+00:00:03.549 [main] INFO - Email sent to testuser@example.com
+00:00:04.549 [main] INFO - Email sent to testuser@example.com
+00:00:04.549 [main] INFO - Email sent to testuser@example.com
+00:00:04.591 [main] INFO - User validUsername has changed his email to existingEmail@example.com
+00:00:04.592 [main] INFO - User validUsername has been updated
+00:00:04.592 [main] ERROR - User validUsername could not be updated
+00:00:04.601 [main] INFO - User null has logged out
