@@ -1,11 +1,13 @@
 package project5.bean;
 
 
+import com.google.gson.JsonObject;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Schedule;
 import jakarta.ejb.Singleton;
 import jakarta.inject.Inject;
 import project5.dao.UserDao;
+import project5.dto.ChatNotification;
 import project5.entity.UserEntity;
 import project5.websocket.WSNotifications;
 
@@ -34,7 +36,10 @@ public class TimerBean {
         }if (user.getTokenExpirationTime() != 0) {
             if (user.getTokenExpirationTime() < System.currentTimeMillis()) {
                 userBean.logout(user.getToken());
-                wsNotifications.send(user.getUsername(), "LogoutRequest");
+                ChatNotification chatNotification = new ChatNotification("LogoutRequest");
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("message", chatNotification.getMessage());
+                wsNotifications.send(user.getUsername(), jsonObject.toString());
             }
         }
     }

@@ -80,12 +80,26 @@ public class UserService implements Serializable {
     @Path("/logout")
     @Produces(MediaType.APPLICATION_JSON)
     public Response logout(@HeaderParam("token") String token, @Context HttpServletRequest request) {
-
-        logger.info("User '{}' logged out. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
-                userBean.convertEntityByToken(token).getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+        System.out.println("token: " + token);
+        logger.info("User logged out. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.logout(token))
             return Response.status(200).entity("Logout Successful!").build();
         logger.info("Failed logout attempt. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+        return Response.status(401).entity("Invalid Token!").build();
+    }
+
+    @POST
+    @Path("/forcedLogout")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response forcedLogout(@HeaderParam("username") String username, @Context HttpServletRequest request) {
+        logger.info("User forced logout. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+
+        if (userBean.forcedLogout(username))
+            return Response.status(200).entity("Forced Logout Successful!").build();
+        logger.info("Failed forced logout attempt. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
                 request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         return Response.status(401).entity("Invalid Token!").build();
     }

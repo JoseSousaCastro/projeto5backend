@@ -36,6 +36,10 @@ public class ChatNotification {
         this.isRead = isRead;
     }
 
+    public ChatNotification (String message) {
+        this.message = message;
+    }
+
     public Long getId() {
         return id;
     }

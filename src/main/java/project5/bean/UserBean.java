@@ -273,8 +273,8 @@ public class UserBean implements Serializable {
         return false;
     }
 
-    public boolean forcedLogout(User user) {
-        UserEntity u = userDao.findUserByUsername(user.getUsername());
+    public boolean forcedLogout(String username) {
+        UserEntity u = userDao.findUserByUsername(username);
         if (u != null) {
             u.setToken(null);
             logger.info("User " + u.getUsername() + " has logged out");
