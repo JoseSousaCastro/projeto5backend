@@ -668,8 +668,8 @@ public class UserService implements Serializable {
         UserEntity userEntity = userDao.findUserByToken(token);
 
         userBean.updateTokenExpirationTime(userEntity);
-        logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
-                userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+        logger.info("Token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         logger.info("User is trying to get all users. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
                 request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {
@@ -1544,8 +1544,8 @@ public class UserService implements Serializable {
         UserEntity userEntity = userDao.findUserByToken(token);
 
         userBean.updateTokenExpirationTime(userEntity);
-        logger.info("User '{}' token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
-                userEntity.getUsername(), request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
+        logger.info("Token expiration time updated. Author: '{}' . IP: '{}'. Timestamp: '{}'.",
+                request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         logger.info("User is trying to get all notifications. Author: '{}'. IP: '{}'. Timestamp: '{}'.",
                 request.getRemoteUser(), request.getRemoteAddr(), LocalDateTime.now());
         if (userBean.isAuthenticated(token)) {

@@ -49,12 +49,17 @@ public class WSTasks {
     public void toDoOnOpen(Session session, @PathParam("token") String token) {
         System.out.println("A new WSTasks session is opened for client with token: " + token);
         UserEntity receiver = userDao.findUserByToken(token);
-        String usernameId = receiver.getUsername();
-        System.out.println("WSTasks usernameId: " + usernameId);
-        sessions.put(usernameId, session);
-        System.out.println("Session added to sessions map on WSTasks: " + session);
-        System.out.println("Sessions map on WSTasks: " + sessions);
-        System.out.println("WSTasks session get usernameId: " + sessions.get(usernameId));
+        if(receiver == null) {
+            System.out.println("UserEntity receiver is null on WSTasks");
+        } else {
+            System.out.println("UserEntity receiver is not null on WSTasks");
+            String usernameId = receiver.getUsername();
+            System.out.println("WSTasks usernameId: " + usernameId);
+            sessions.put(usernameId, session);
+            System.out.println("Session added to sessions map on WSTasks: " + session);
+            System.out.println("Sessions map on WSTasks: " + sessions);
+            System.out.println("WSTasks session get usernameId: " + sessions.get(usernameId));
+        }
     }
 
     @OnClose

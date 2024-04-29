@@ -55,7 +55,10 @@ public class WSNotifications {
         System.out.println("A new WSNotifications session is opened for client with token: " + token);
         UserEntity receiver = userDao.findUserByToken(token);
         userBean.updateTokenExpirationTime(receiver);
-
+        if (receiver == null) {
+            System.out.println("UserEntity receiver is null on WSNotifications");
+        } else {
+            System.out.println("UserEntity receiver is not null on WSNotifications");
         String usernameId = receiver.getUsername();
         System.out.println("WSNotifications usernameId: " + usernameId);
         sessions.put(usernameId, session);
@@ -63,6 +66,7 @@ public class WSNotifications {
         System.out.println("Sessions map on WSNotifications: " + sessions);
         System.out.println("WSNotifications session get usernameId: " + sessions.get(usernameId));
     }
+}
 
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {

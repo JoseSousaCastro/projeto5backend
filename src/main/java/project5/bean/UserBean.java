@@ -730,7 +730,7 @@ public class UserBean implements Serializable {
             updateUser(userDto, user.getUsername());
             logger.info("User " + user.getUsername() + " has updated his token expiration time");
         } else {
-            logger.error("User " + user.getUsername() + " could not update his token expiration time");
+            logger.error("Not update his token expiration time");
         }
     }
 
